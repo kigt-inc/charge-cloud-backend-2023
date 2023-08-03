@@ -1,5 +1,7 @@
 # KIGT Backend Reference
 
+Uses Typescript and Node for backend operations needed for the Charge Cloud UI
+
 ## Features
 
 - Connecting to MySQL database
