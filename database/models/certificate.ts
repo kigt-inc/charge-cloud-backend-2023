@@ -14,10 +14,10 @@ const Certificate = sequelize.define<CertificatesModel>(
     co2_certificate_agency_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      references: {
-        model: "co2_certificate_authority",
-        key: "co2_certificate_agency_id",
-      },
+    //   references: {
+    //     model: "co2_certificate_authority",
+    //     key: "co2_certificate_agency_id",
+    //   },
     },
     kigt_account: {
       type: Sequelize.STRING(25),
