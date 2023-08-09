@@ -5,8 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "rimraf dist && npx tsc",
-    "start": "concurrently \"npx tsc -w\" \"nodemon dist/index.js\""
+    "predev": "rimraf dist && npx tsc",
+    "dev": "concurrently \"npx tsc -w\" \"nodemon dist/index.js\"",
+    "start": "npx tsc && dist/index.js"
   },
   "repository": {
     "type": "git",
