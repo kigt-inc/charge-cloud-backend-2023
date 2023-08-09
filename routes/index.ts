@@ -1,6 +1,7 @@
 import express from "express";
 let router = express.Router();
 import _ from "lodash";
+import webhookRoutes from "./webhook";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -17,5 +18,8 @@ router.get("/api/", (req, res, next) => {
   res.status(200).json({ message: "Welcome to KIGT" });
   next();
 });
+
+/* WebHook routes */
+router.use("/api/webhook", webhookRoutes);
 
 export default router;
