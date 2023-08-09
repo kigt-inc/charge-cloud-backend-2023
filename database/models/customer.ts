@@ -32,10 +32,10 @@ const Customer = sequelize.define<CustomersModel>(
     customer_user_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      references: {
-        model: "users",
-        key: "user_id",
-      },
+    //   references: {
+    //     model: "users",
+    //     key: "user_id",
+    //   },
     },
   },
   {
