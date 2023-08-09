@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "predev": "rimraf dist && npx tsc",
     "dev": "concurrently \"npx tsc -w\" \"nodemon dist/index.js\"",
-    "start": "npx tsc && dist/index.js"
+    "start": "rimraf dist && npx tsc && node dist/index.js"
   },
   "repository": {
     "type": "git",
