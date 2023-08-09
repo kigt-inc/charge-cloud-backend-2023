@@ -2,7 +2,7 @@ import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { EVChargerTimestampsModel } from "../../types/evChargerTimestamp";
 
-const EVChargerTimestamps = sequelize.define<EVChargerTimestampsModel>(
+const EVChargerTimestamp = sequelize.define<EVChargerTimestampsModel>(
   "ev_charger_timestamps",
   {
     ev_charger_timestamp_id: {
@@ -107,4 +107,4 @@ const EVChargerTimestamps = sequelize.define<EVChargerTimestampsModel>(
   }
 );
 
-export default EVChargerTimestamps;
+export default EVChargerTimestamp;

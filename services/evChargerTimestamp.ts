@@ -5,7 +5,7 @@ import Sequelize, { Transaction } from "sequelize";
 import { EVChargerTimestampsAttributes } from "../types/evChargerTimestamp";
 
 const getAllEVChargerTimestamps = async (params: { [key: string]: any }) => {
-  const { EVChargerTimestamps } = Models;
+  const { EVChargerTimestamp } = Models;
   const { limit, offset } = getPagination(params?.page, params?.limit, 10);
   const searchObj = params?.search
     ? {
@@ -17,7 +17,7 @@ const getAllEVChargerTimestamps = async (params: { [key: string]: any }) => {
   const where = {
     ...searchObj,
   };
-  let owners = await EVChargerTimestamps.findAndCountAll({
+  let evChargerTimestamps = await EVChargerTimestamp.findAndCountAll({
     where,
     limit,
     offset,
@@ -29,7 +29,7 @@ const getAllEVChargerTimestamps = async (params: { [key: string]: any }) => {
     raw: true,
   });
 
-  return { data: owners?.rows, count: owners?.count };
+  return { data: evChargerTimestamps?.rows, count: evChargerTimestamps?.count };
 };
 
 /* Create new ev charger timestamp*/
@@ -37,8 +37,8 @@ const createEVChargerTimestamp = async (
   timestampObj: Partial<EVChargerTimestampsAttributes>,
   transaction: Transaction
 ) => {
-  const { EVChargerTimestamps } = Models;
-  let evChargerTimestampCreated = await EVChargerTimestamps.create(
+  const { EVChargerTimestamp } = Models;
+  let evChargerTimestampCreated = await EVChargerTimestamp.create(
     timestampObj,
     transaction
   );
@@ -55,8 +55,8 @@ const editEVChargerTimestamp = async (
   id: string,
   transaction: Transaction
 ) => {
-  const { EVChargerTimestamps } = Models;
-  let evChargerTimestamp = await EVChargerTimestamps.findOne({
+  const { EVChargerTimestamp } = Models;
+  let evChargerTimestamp = await EVChargerTimestamp.findOne({
     where: {
       ev_charger_timestamp_id: id,
     },
@@ -64,14 +64,14 @@ const editEVChargerTimestamp = async (
     transaction,
   });
   if (evChargerTimestamp) {
-    let evChargerTimestampUpdated = await EVChargerTimestamps.update(
+    let evChargerTimestampUpdated = await EVChargerTimestamp.update(
       timestampObj,
       {
         where: { ev_charger_timestamp_id: id },
         transaction,
       }
     ).then(async () => {
-      return await EVChargerTimestamps.findOne({
+      return await EVChargerTimestamp.findOne({
         where: { ev_charger_timestamp_id: id },
         transaction,
         rae: true,
@@ -85,8 +85,8 @@ const editEVChargerTimestamp = async (
 
 /* get ev charger timestamp by id */
 const getEVChargerTimestamp = async (id: string, transaction: Transaction) => {
-  const { EVChargerTimestamps } = Models;
-  const evChargerTimestamp = await EVChargerTimestamps.findOne({
+  const { EVChargerTimestamp } = Models;
+  const evChargerTimestamp = await EVChargerTimestamp.findOne({
     where: {
       ev_charger_timestamp_id: id,
     },
@@ -99,8 +99,8 @@ const getEVChargerTimestamp = async (id: string, transaction: Transaction) => {
 
 /* Soft delete ev charger timestamp */
 const deleteEVChargerTimestamp = async (id: string) => {
-  const { EVChargerTimestamps } = Models;
-  const evChargerTimestampDeleted = await EVChargerTimestamps.destroy({
+  const { EVChargerTimestamp } = Models;
+  const evChargerTimestampDeleted = await EVChargerTimestamp.destroy({
     where: {
       ev_charger_timestamp_id: id,
     },

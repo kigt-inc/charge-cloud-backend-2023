@@ -1,11 +1,24 @@
-// import User from "./user";
-import ChargeStations from "./chargeStation";
-import EVChargerTimestamps from "./evChargerTimestamp";
+import Certificate from "./certificate";
+import ChargeStation from "./chargeStation";
+import Client from "./client";
+import Customer from "./customer";
+import EVChargeStationTrans from "./evChargerStationTrans";
+import EVChargerTimestamp from "./evChargerTimestamp";
+import Location from "./location";
+import Merchant from "./merchant";
 import { relations } from "./modelRelations";
+import TransactionTimestamp from "./transactionTimestamp";
 
 const Models = relations.associateRelationships({
-  ChargeStations,
-  EVChargerTimestamps,
+  ChargeStation,
+  EVChargerTimestamp,
+  Certificate,
+  Customer,
+  Merchant,
+  TransactionTimestamp,
+  Client,
+  EVChargeStationTrans,
+  Location
 });
 
 export default Models;

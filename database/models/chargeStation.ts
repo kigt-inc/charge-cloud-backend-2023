@@ -2,7 +2,7 @@ import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { ChargeStationsModel } from "../../types/chargeStation";
 
-const ChargeStations = sequelize.define<ChargeStationsModel>(
+const ChargeStation = sequelize.define<ChargeStationsModel>(
   "charge_stations",
   {
     charge_station_id: {
@@ -134,4 +134,4 @@ const ChargeStations = sequelize.define<ChargeStationsModel>(
   }
 );
 
-export default ChargeStations;
+export default ChargeStation;
