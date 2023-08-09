@@ -5,11 +5,11 @@ import Sequelize, { Transaction } from "sequelize";
 import { ChargeStationsAttributes } from "../types/chargeStation";
 
 const getAllChargeStations = async (params: { [key: string]: any }) => {
-  const { ChargeStations } = Models;
+  const { ChargeStation } = Models;
   const { limit, offset } = getPagination(params?.page, params?.limit, 10);
   const searchObj = params?.search
     ? {
-        serial_no: {
+        charge_station_id: {
           [Sequelize.Op.like]: `%${params.search}%`,
         },
       }
@@ -17,7 +17,7 @@ const getAllChargeStations = async (params: { [key: string]: any }) => {
   const where = {
     ...searchObj,
   };
-  let owners = await ChargeStations.findAndCountAll({
+  let chargeStations = await ChargeStation.findAndCountAll({
     where,
     limit,
     offset,
@@ -29,15 +29,15 @@ const getAllChargeStations = async (params: { [key: string]: any }) => {
     raw: true,
   });
 
-  return { data: owners?.rows, count: owners?.count };
+  return { data: chargeStations?.rows, count: chargeStations?.count };
 };
 
 /* Create new charge station*/
 const createChargeStation = async (
   chargeStationObj: ChargeStationsAttributes
 ) => {
-  const { ChargeStations } = Models;
-  let chargeStationCreated = await ChargeStations.create(chargeStationObj);
+  const { ChargeStation } = Models;
+  let chargeStationCreated = await ChargeStation.create(chargeStationObj);
   if (chargeStationCreated) {
     chargeStationCreated = chargeStationCreated?.toJSON();
     return chargeStationCreated;
@@ -51,8 +51,8 @@ const editChargeStation = async (
   id: string,
   transaction: Transaction
 ) => {
-  const { ChargeStations } = Models;
-  let chargeStation = await ChargeStations.findOne({
+  const { ChargeStation } = Models;
+  let chargeStation = await ChargeStation.findOne({
     where: {
       charge_station_id: id,
     },
@@ -60,11 +60,11 @@ const editChargeStation = async (
     transaction,
   });
   if (chargeStation) {
-    let chargeStationUpdated = await ChargeStations.update(chargeStationObj, {
+    let chargeStationUpdated = await ChargeStation.update(chargeStationObj, {
       where: { charge_station_id: id },
       transaction,
     }).then(async () => {
-      return await ChargeStations.findOne({
+      return await ChargeStation.findOne({
         where: { charge_station_id: id },
         transaction,
         rae: true,
@@ -78,8 +78,8 @@ const editChargeStation = async (
 
 /* get charge station by id */
 const getChargeStation = async (id: string) => {
-  const { ChargeStations } = Models;
-  const chargeStation = await ChargeStations.findOne({
+  const { ChargeStation } = Models;
+  const chargeStation = await ChargeStation.findOne({
     where: {
       charge_station_id: id,
     },
@@ -94,8 +94,8 @@ const getChargeStationBySerialNo = async (
   serial_no: number,
   transaction: Transaction
 ) => {
-  const { ChargeStations } = Models;
-  const chargeStation = await ChargeStations.findOne({
+  const { ChargeStation } = Models;
+  const chargeStation = await ChargeStation.findOne({
     where: {
       ev_charger_serial_no: serial_no,
     },
@@ -108,8 +108,8 @@ const getChargeStationBySerialNo = async (
 
 /* Soft delete charge station */
 const deleteChargeStation = async (id: string) => {
-  const { ChargeStations } = Models;
-  const chargeStationDeleted = await ChargeStations.destroy({
+  const { ChargeStation } = Models;
+  const chargeStationDeleted = await ChargeStation.destroy({
     where: {
       charge_station_id: id,
     },
