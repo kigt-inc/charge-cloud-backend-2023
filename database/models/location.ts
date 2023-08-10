@@ -14,18 +14,18 @@ const Location = sequelize.define<LocationsModel>(
     utility_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
-    //   references: {
-    //     model: "utilities",
-    //     key: "utility_id",
-    //   },
+      references: {
+        model: "utilities",
+        key: "utility_id",
+      },
     },
     co2_certificate_agency_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
-    //   references: {
-    //     model: "co2_certificate_authority",
-    //     key: "co2_certificate_agency_id",
-    //   },
+      references: {
+        model: "co2_certificate_authority",
+        key: "co2_certificate_agency_id",
+      },
     },
     location_name: {
       type: Sequelize.STRING(25),
