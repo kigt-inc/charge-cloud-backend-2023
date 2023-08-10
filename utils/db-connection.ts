@@ -35,7 +35,7 @@ let sequelize = new Sequelize(
       idle: 5000,
       acquire: 30000,
     },
-    port: Number(process.env.DB_PORT!),
+    port: Number(process.env.DB_PORT),
     dialect: "mysql",
     ssl: true,
   }
