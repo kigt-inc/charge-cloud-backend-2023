@@ -36,13 +36,9 @@ const getAllTransactionTimestamps = async (params: { [key: string]: any }) => {
 };
 
 /* Create new TransactionTimestamp*/
-const createTransactionTimestamp = async (
-  transactionTimestampObj: TransactionTimestampsAttributes
-) => {
+const createTransactionTimestamp = async () => {
   const { TransactionTimestamp } = Models;
-  let transactionTimestampCreated = await TransactionTimestamp.create(
-    transactionTimestampObj
-  );
+  let transactionTimestampCreated = await TransactionTimestamp.create();
   if (transactionTimestampCreated) {
     transactionTimestampCreated = transactionTimestampCreated?.toJSON();
     return transactionTimestampCreated;

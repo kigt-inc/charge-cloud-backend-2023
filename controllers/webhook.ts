@@ -5,6 +5,7 @@ import sequelize from "../utils/db-connection";
 import evChargerTimestampsServices from "../services/evChargerTimestamp";
 import chargeStationsServices from "../services/chargeStation";
 import { EVChargerTimestampsAttributes } from "../types/evChargerTimestamp";
+import transactionTimestampServices from "../services/transactionTimestamp";
 
 const hookKeys: string[] = [
   "Serial Number",
@@ -109,6 +110,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     //   });
     // }
 
+    const transactionTimestamp =
+      await transactionTimestampServices.createTransactionTimestamp();
+
     const insertObj: Partial<EVChargerTimestampsAttributes> = {
       serial_no: data["Serial Number"],
       evse_last_transaction_payment_id:
@@ -137,7 +141,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
 
       EVSE_Throttle_Availability_Amount:
         data["EVSE Throttle Availability Amount"],
-      transaction_timestamps_id: "1",
+      transaction_timestamps_id: transactionTimestamp.transaction_timestamp_id,
       //process_indicator
       //evse_energy_usage
     };
