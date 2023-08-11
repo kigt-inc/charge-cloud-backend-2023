@@ -7,8 +7,6 @@ Uses Typescript and Node for backend operations needed for the Charge Cloud UI
 - Connecting to MySQL database
 - CRUD endpoints for the following : ADD TEXT HERE
 - Webhook
-  `<br />`
-  `<br />`
 
 ## Environment Variables
 
@@ -30,7 +28,6 @@ Install the required packages with npm.
   npm install
 ```
 
-`<br /><br />`
 
 ## Installations instructions and Run code
 
