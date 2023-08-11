@@ -7,8 +7,8 @@ Uses Typescript and Node for backend operations needed for the Charge Cloud UI
 - Connecting to MySQL database
 - CRUD endpoints for the following : ADD TEXT HERE
 - Webhook
-<br />
-<br />
+  `<br />`
+  `<br />`
 
 ## Environment Variables
 
@@ -30,10 +30,15 @@ Install the required packages with npm.
   npm install
 ```
 
-<br /><br />
+`<br /><br />`
 
-## Build and Run code
-ADD DIRECTIONS HERE
+## Installations instructions and Run code
+
+1. To install all dependencies: npm i
+2. Add env file for reference check .env.example file
+3. Create the database at mysql
+4. To run migrations using: npx sequelize-cli db:migrate
+5. To start the server run: npm run dev
 
 ### Before you begin
 
@@ -43,11 +48,8 @@ ADD DIRECTIONS HERE
 
 ### Dev
 
-
 <br />
 
 ### Production
 
-
 ## API Reference
-
