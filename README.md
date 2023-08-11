@@ -8,18 +8,6 @@ Uses Typescript and Node for backend operations needed for the Charge Cloud UI
 - CRUD endpoints for the following : ADD TEXT HERE
 - Webhook
 
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to an .env file
-
-`DATABASE_URL` ,
-`PORT` ,
-
-These are used to establish a connection between the project and the specified MySQL database.
-
-<br />
-<br />
-
 ## Install packages needed with npm
 
 Install the required packages with npm.
@@ -28,25 +16,61 @@ Install the required packages with npm.
   npm install
 ```
 
+## Run Locally
 
-## Installations instructions and Run code
+Clone the project
 
-1. To install all dependencies: npm i
-2. Add env file for reference check .env.example file
-3. Create the database at mysql
-4. To run migrations using: npx sequelize-cli db:migrate
-5. To start the server run: npm run dev
+```bash
+  git clone https://github.com/kigt-inc/charge-cloud-backend-2023.git
+```
 
-### Before you begin
+Go to the project directory
 
-ADD DIRECTIONS HERE
+```bash
+  cd charge-cloud-backend-2023
+```
 
-<br />
+Install dependencies
 
-### Dev
+```bash
+  npm install
+```
 
-<br />
+Add env file for reference check .env.example file
 
-### Production
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to an .env file
+
+create `charge-cloud-backend-2023/.env` environement file in your local system:
+
+- PORT
+- DB_NAME
+- DB_USERNAME
+- DB_PASSWORD
+- DB_HOST
+- DB_PORT
+
+These are used to establish a connection between the project and the specified MySQL database.
+
+Create the database at mysql
+
+To run migrations
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+Start the server
+
+```bash
+npm run dev
+```
+
+## Run Server on the Production with all migrations
+
+```bash
+npm run start
+```
 
 ## API Reference
