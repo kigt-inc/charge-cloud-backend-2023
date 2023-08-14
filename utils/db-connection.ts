@@ -1,20 +1,6 @@
 import "dotenv/config";
 import { Sequelize } from "sequelize";
 
-console.log(process.env.DB_USERNAME, "process.env.DB_USERNAME");
-console.log("-----------------");
-console.log(process.env.DB_PASSWORD, "process.env.DB_PASSWORD");
-console.log("-----------------");
-console.log(process.env.DB_NAME, "process.env.DB_NAME");
-console.log("-----------------");
-console.log(process.env.DB_HOST, "process.env.DB_HOST");
-console.log("-----------------");
-console.log(process.env.DB_PORT, "process.env.DB_PORT");
-console.log("-----------------");
-console.log(process.env.PORT, "process.env.PORT");
-console.log("FROM DB CONNECTION FILE");
-
-
 // code to connect sequelize to MYsql
 let sequelize = new Sequelize(
   process.env.DB_NAME!,

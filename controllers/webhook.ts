@@ -6,6 +6,10 @@ import evChargerTimestampsServices from "../services/evChargerTimestamp";
 import chargeStationsServices from "../services/chargeStation";
 import { EVChargerTimestampsAttributes } from "../types/evChargerTimestamp";
 import transactionTimestampServices from "../services/transactionTimestamp";
+import { EVChargeStationTransAttributes } from "../types/evChargeStationTrans";
+import moment from "moment";
+import evChargerStationTransServices from "../services/evChargerStationTrans";
+import axios from "axios";
 
 const hookKeys: string[] = [
   "Serial Number",
@@ -37,16 +41,14 @@ const hookKeys: string[] = [
 
 /* list summary count */
 const createWebHook: RequestHandler = async (req, res, next) => {
-  const data = req.body;
-  console.log(data, "data");
-
   const transaction = await sequelize.transaction();
   try {
-    console.log(req.headers["authorization"]);
-
+    const data = req.body;
+    let body, priority;
+    let transactionTimestampId;
     // Validation logic
     const webhookAuth = "kigt_authorization_tams22471$$";
-    const authHeader = req.headers["authorization"];
+    const authHeader = req.headers["id"];
 
     if (authHeader !== webhookAuth) {
       await transaction.rollback();
@@ -78,13 +80,85 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         message: CONSTANTS.KEYS_NOT_MATCH,
       });
     }
+    console.log(data["EVSE Status Code"]);
+    console.log(typeof data["EVSE Status Code"]);
+    
+    if (
+      data["EVSE Status Code"] !== "1" &&
+      data["EVSE Status Code"] !== "2" &&
+      data["EVSE Status Code"] !== "3" &&
+      data["EVSE Status Code"] !== "254" &&
+      data["EVSE Status Code"] !== "255"
+    ) {
+      console.log("in switch");
+      
+      switch (data["EVSE Status Code"]) {
+        case "4":
+          body = "Vent Required";
+          priority = "normal";
+          break;
+        case "5":
+          body = "Diode Check Failed";
+          priority = "normal";
+          break;
+        case "6":
+          body = "GFCI Fault";
+          priority = "high";
+          break;
+        case "7":
+          body = "Bad Ground";
+          priority = "normal";
+          break;
+        case "8":
+          body = "Stuck Relay";
+          priority = "high";
+          break;
+        case "9":
+          body = "GFI Self-Test Failure";
+          priority = "urgent";
+          break;
+        case "10":
+          body = "Over Temperature Error Shutdown";
+          priority = "urgent";
+          break;
+        default:
+          body = "Something Went Wrong";
+          priority = "urgent";
+          break;
+      }
+
+      const ticketData = JSON.stringify({
+        ticket: {
+          comment: {
+            body,
+          },
+          priority,
+          subject: "KIGT Charge Cloud Webhook",
+        },
+      });
+
+      const passwordString = `${process.env.ZENDESK_USERNAME}:${process.env.ZENDESK_API_TOKEN}`;
+      const base64PasswordString = btoa(passwordString);
+
+      const config = {
+        method: "POST",
+        url: `${process.env.ZENDESK_REMOTE_URL}/tickets`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${base64PasswordString}`, // Base64 encoded "username:password"
+        },
+        data: ticketData,
+      };
+
+      let response = await axios(config);
+      return res.status(201).send(response?.data);
+    }
 
     const evChargerTimestamp =
       await evChargerTimestampsServices.getEVChargerTimestamp(
         data["unique_id"],
         transaction
       );
-    console.log(evChargerTimestamp, "evChargerTimestamp");
 
     if (evChargerTimestamp) {
       await transaction.rollback();
@@ -110,8 +184,26 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     //   });
     // }
 
-    const transactionTimestamp =
-      await transactionTimestampServices.createTransactionTimestamp();
+    let lastTimestampInfo =
+      await evChargerTimestampsServices.lastEVChargerTimestamp(
+        data["Serial Number"],
+        transaction
+      );
+
+    if (data["EVSE Status Code"] === "1" || data["EVSE Status Code"] === "2") {
+      if (lastTimestampInfo?.evse_status_code === "255") {
+        transactionTimestampId =
+          await transactionTimestampServices.createTransactionTimestamp();
+        transactionTimestampId =
+          transactionTimestampId?.transaction_timestamp_id;
+      } else {
+        transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
+      }
+    } else if (data["EVSE Status Code"] === "255") {
+      transactionTimestampId = null;
+    } else {
+      transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
+    }
 
     const insertObj: Partial<EVChargerTimestampsAttributes> = {
       serial_no: data["Serial Number"],
@@ -141,23 +233,90 @@ const createWebHook: RequestHandler = async (req, res, next) => {
 
       EVSE_Throttle_Availability_Amount:
         data["EVSE Throttle Availability Amount"],
-      transaction_timestamps_id: transactionTimestamp.transaction_timestamp_id,
+      transaction_timestamps_id: transactionTimestampId,
       //process_indicator
       //evse_energy_usage
     };
 
-    let result = await evChargerTimestampsServices.createEVChargerTimestamp(
-      insertObj,
-      transaction
-    );
-    console.log(result, "res");
+    let result =
+      await evChargerTimestampsServices.createEVChargerTimestamp(
+        insertObj,
+        transaction
+      );
+
+    if (data["EVSE Status Code"] === "254") {
+      lastTimestampInfo =
+        await evChargerTimestampsServices.lastEVChargerTimestamp(
+          data["Serial Number"],
+          transaction
+        );
+      if (
+        lastTimestampInfo?.evse_status_code === "1" ||
+        lastTimestampInfo?.evse_status_code === "2" ||
+        lastTimestampInfo?.evse_status_code === "3"
+      ) {
+        const allTimestampsForOneSession =
+          await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
+            transactionTimestampId,
+            data["Serial Number"]
+          );
+
+        const eventDuration = moment(
+          allTimestampsForOneSession[0].status_change_timestamp
+        ).diff(
+          moment(
+            allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
+              .status_change_timestamp
+          ),
+          "minutes",
+          true
+        );
+
+        const { status_change_timestamp: notPluggedTimestamp } =
+          allTimestampsForOneSession.find(
+            (timeStamp: EVChargerTimestampsAttributes) =>
+              timeStamp.evse_status_code === "1"
+          ) ?? {};
+        const { status_change_timestamp: pluggedTimestamp } =
+          allTimestampsForOneSession.find(
+            (timeStamp: EVChargerTimestampsAttributes) =>
+              timeStamp.evse_status_code === "2"
+          ) ?? {};
+        const { status_change_timestamp: chargingStartTimestamp } =
+          allTimestampsForOneSession.find(
+            (timeStamp: EVChargerTimestampsAttributes) =>
+              timeStamp.evse_status_code === "3"
+          ) ?? {};
+
+        const transObj: Partial<EVChargeStationTransAttributes> = {
+          transaction_timestamp_id: transactionTimestampId,
+          transaction_status: "ended",
+          connector_status: "Available",
+          event_start:
+            allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
+              .status_change_timestamp,
+          event_end: allTimestampsForOneSession[0].status_change_timestamp,
+          event_duration: eventDuration,
+          meter_start: chargingStartTimestamp
+            ? chargingStartTimestamp
+            : pluggedTimestamp
+            ? pluggedTimestamp
+            : notPluggedTimestamp,
+          meter_end: allTimestampsForOneSession[0].status_change_timestamp,
+          kwh_session: (eventDuration / 60) * 5.8,
+        };
+
+        await evChargerStationTransServices.createEVChargeStationTrans(
+          transObj
+        );
+      }
+    }
 
     await transaction.commit();
     res.status(201).send({ isSuccess: true, data: result, message: "Success" });
 
     next();
   } catch (error) {
-    console.log("in");
     await transaction.rollback();
     console.error("Error:", error);
     res.status(500).json({

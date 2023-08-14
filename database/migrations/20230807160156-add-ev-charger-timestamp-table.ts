@@ -16,7 +16,8 @@ module.exports = {
           },
           transaction_timestamps_id: {
             type: Sequelize.INTEGER,
-            allowNull: false,
+            allowNull: true,
+            defaultValue: null,
             references: {
               model: "transaction_timestamps",
               key: "transaction_timestamp_id",
@@ -37,19 +38,21 @@ module.exports = {
             type: Sequelize.STRING,
           },
           evse_last_transaction_timestamp: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
+            allowNull: false,
           },
           evse_last_transaction_amount: {
             type: Sequelize.STRING,
           },
           evse_charging_last_time_stamp: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
+            allowNull: false,
           },
           evse_current: {
             type: Sequelize.STRING,
           },
           evse_last_current_timestamp: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.DATE,
             allowNull: false,
           },
           evse_energy: {

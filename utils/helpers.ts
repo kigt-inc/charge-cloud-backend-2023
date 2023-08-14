@@ -41,9 +41,6 @@ export const validateOtp = (
 ) => {
   if (otpDetails?.emailOtp) {
     if (otpDetails.emailOtp == receivedEmailOtp) {
-      console.log(moment(), "cur");
-      console.log(moment(otpDetails.expirationTime), "expr");
-
       if (moment().isBefore(moment(otpDetails.expirationTime))) {
         return true;
       } else {
