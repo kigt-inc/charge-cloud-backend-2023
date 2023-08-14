@@ -21,7 +21,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     customer_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "customers",
         key: "customer_id",
@@ -29,7 +29,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     charge_station_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "charge_stations",
         key: "charge_station_id",
@@ -37,7 +37,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     certificate_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "certificates",
         key: "certificate_id",
@@ -45,7 +45,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     id_evse: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     transaction_status: {
       type: Sequelize.STRING(15),
@@ -53,7 +53,8 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     transaction_stop_reason: {
       type: Sequelize.STRING(20),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
     },
     connector_status: {
       type: Sequelize.STRING(12),
@@ -61,7 +62,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     event_record_type: {
       type: Sequelize.STRING(2),
-      allowNull: false,
+      allowNull: true,
     },
     event_start: {
       type: Sequelize.DATE,
@@ -77,31 +78,31 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     qr_count: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     purchase_product_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     purchase_produce_name: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     customer_throttle: {
       type: Sequelize.STRING(1),
-      allowNull: false,
+      allowNull: true,
     },
     customer_throttle_number: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     customer_throttle_acceptance_time: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     customer_throttle_time: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     meter_start: {
       type: Sequelize.DATE,

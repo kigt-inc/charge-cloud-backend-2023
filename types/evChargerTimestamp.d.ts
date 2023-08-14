@@ -2,18 +2,16 @@ import { Model } from "sequelize";
 
 export interface EVChargerTimestampsAttributes {
   ev_charger_timestamp_id: number;
-  transaction_timestamps_id: string;
-  ev_charger_timestamp_id: number;
   transaction_timestamps_id: number;
   serial_no: number;
   process_indicator: string;
   status_change_timestamp: Date;
   evse_last_transaction_payment_id: string;
-  evse_last_transaction_timestamp: string;
+  evse_last_transaction_timestamp: Date;
   evse_last_transaction_amount: string;
-  evse_charging_last_time_stamp: string;
+  evse_charging_last_time_stamp: Date;
   evse_current: string;
-  evse_last_current_timestamp: number;
+  evse_last_current_timestamp: Date;
   evse_energy: string;
   evse_connected_to_interface: true | false;
   evse_location: string;

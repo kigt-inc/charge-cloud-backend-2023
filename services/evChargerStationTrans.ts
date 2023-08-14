@@ -37,7 +37,7 @@ const getAllEVChargeStationTrans = async (params: { [key: string]: any }) => {
 
 /* Create new EVChargeStationTrans*/
 const createEVChargeStationTrans = async (
-  evChargerStationTransObj: EVChargeStationTransAttributes
+  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>,
 ) => {
   const { EVChargeStationTrans } = Models;
   let evChargerStationTransCreated = await EVChargeStationTrans.create(
