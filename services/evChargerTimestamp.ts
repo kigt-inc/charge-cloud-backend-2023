@@ -74,7 +74,7 @@ const editEVChargerTimestamp = async (
       return await EVChargerTimestamp.findOne({
         where: { ev_charger_timestamp_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return evChargerTimestampUpdated;

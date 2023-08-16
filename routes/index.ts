@@ -16,7 +16,6 @@ router.all("*", (req, res, next) => {
 /* GET home page. */
 router.get("/api/", (req, res, next) => {
   res.status(200).json({ message: "Welcome to KIGT" });
-  next();
 });
 
 /* WebHook routes */

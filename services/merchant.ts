@@ -65,7 +65,7 @@ const editMerchant = async (
       return await Merchant.findOne({
         where: { merchant_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return merchantUpdated;

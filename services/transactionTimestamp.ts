@@ -71,7 +71,7 @@ const editTransactionTimestamp = async (
       return await TransactionTimestamp.findOne({
         where: { transaction_timestamp_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return transactionTimestampUpdated;

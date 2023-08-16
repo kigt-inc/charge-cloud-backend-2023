@@ -67,7 +67,7 @@ const editCertificate = async (
       return await Certificate.findOne({
         where: { certificate_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return certificateUpdated;
