@@ -52,7 +52,7 @@ const createEVChargeStationTrans = async (
 };
 
 const editEVChargeStationTrans = async (
-  evChargerStationTransObj: EVChargeStationTransAttributes,
+  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>,
   id: string,
   transaction: Transaction
 ) => {
@@ -97,6 +97,21 @@ const getEVChargeStationTrans = async (id: string) => {
   return evChargerStationTrans || null;
 };
 
+/* get EVChargeStationTrans by id */
+const getEVChargeStationTransByTransactionTimestampId = async (
+  id: number
+) => {
+  const { EVChargeStationTrans } = Models;
+  const evChargerStationTrans = await EVChargeStationTrans.findOne({
+    where: {
+      transaction_timestamp_id: id,
+    },
+    raw: true,
+  });
+
+  return evChargerStationTrans || null;
+};
+
 /* Soft delete EVChargeStationTrans */
 const deleteEVChargeStationTrans = async (id: string) => {
   const { EVChargeStationTrans } = Models;
@@ -115,4 +130,5 @@ export default {
   editEVChargeStationTrans,
   getEVChargeStationTrans,
   deleteEVChargeStationTrans,
+  getEVChargeStationTransByTransactionTimestampId,
 };
