@@ -49,7 +49,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     transaction_status: {
       type: Sequelize.STRING(15),
-      allowNull: false,
+      allowNull: true,
     },
     transaction_stop_reason: {
       type: Sequelize.STRING(20),
@@ -58,7 +58,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     connector_status: {
       type: Sequelize.STRING(12),
-      allowNull: false,
+      allowNull: true,
     },
     event_record_type: {
       type: Sequelize.STRING(2),
@@ -66,15 +66,15 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     event_start: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     event_end: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     event_duration: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     qr_count: {
       type: Sequelize.INTEGER,
@@ -106,14 +106,15 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
     },
     meter_start: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     meter_end: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     kwh_session: {
       type: Sequelize.FLOAT,
+      allowNull: true,
     },
     event_trigger_reason: {
       type: Sequelize.STRING(20),

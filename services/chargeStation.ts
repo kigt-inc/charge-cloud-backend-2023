@@ -47,7 +47,7 @@ const createChargeStation = async (
 };
 
 const editChargeStation = async (
-  chargeStationObj: ChargeStationsAttributes,
+  chargeStationObj: Partial<ChargeStationsAttributes>,
   id: string,
   transaction: Transaction
 ) => {
