@@ -13,6 +13,7 @@ import axios from "axios";
 import { ChargeStationsAttributes } from "../types/chargeStation";
 import { Transaction } from "sequelize";
 import { EventTimestampsAttributes } from "../types/eventTimestamp";
+import { initIO } from "../utils/socket";
 
 type errCaseHandleAttributes = {
   lastTimestampInfo: Partial<EVChargerTimestampsAttributes>;
@@ -161,6 +162,7 @@ const errCaseHandle: errCaseFunction = async ({
 const createWebHook: RequestHandler = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
+    const io = initIO();
     const data = req.body;
     const errorStatusCodes = ["4", "5", "6", "7", "8", "9", "10"];
 
@@ -540,20 +542,22 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         );
       }
 
-      chargeStationObj! ??
-        (await chargeStationsServices.editChargeStation(
-          chargeStationObj!,
-          chargeStation?.charge_station_id,
-          transaction
-        ));
+      if (chargeStationObj!) {
+        const chargeStationUpdated =
+          await chargeStationsServices.editChargeStation(
+            chargeStationObj!,
+            chargeStation?.charge_station_id,
+            transaction
+          );
+
+        io.emit("chargeStationStatus", chargeStationUpdated);
+      }
     }
 
     await transaction.commit();
     res
       .status(201)
       .send({ isSuccess: true, data: result!, message: "Success" });
-
-    next();
   } catch (error) {
     await transaction.rollback();
     console.error("Error:", error);

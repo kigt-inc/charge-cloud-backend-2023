@@ -65,7 +65,7 @@ const editCustomer = async (
       return await Customer.findOne({
         where: { customer_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return customerUpdated;

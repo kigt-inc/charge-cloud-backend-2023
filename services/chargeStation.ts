@@ -67,7 +67,7 @@ const editChargeStation = async (
       return await ChargeStation.findOne({
         where: { charge_station_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return chargeStationUpdated;

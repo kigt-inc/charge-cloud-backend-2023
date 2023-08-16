@@ -65,7 +65,7 @@ const editLocation = async (
       return await Location.findOne({
         where: { location_id: id },
         transaction,
-        rae: true,
+        raw: true,
       });
     });
     return locationUpdated;
