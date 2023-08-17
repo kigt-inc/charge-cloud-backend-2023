@@ -18,7 +18,8 @@ import { initIO } from "../utils/socket";
 type errCaseHandleAttributes = {
   lastTimestampInfo: Partial<EVChargerTimestampsAttributes>;
   data: { [key: string]: any };
-  body: string;
+  html_body: string;
+  reason: string;
   priority: string;
   transaction: Transaction;
 };
@@ -94,11 +95,11 @@ const createInsertObj = (
   return insertObj;
 };
 
-const zendeskTicketCreation = async (body: string, priority: string) => {
+const zendeskTicketCreation = async (html_body: string, priority: string) => {
   const ticketData = JSON.stringify({
     ticket: {
       comment: {
-        body,
+        html_body,
       },
       priority,
       subject: "KIGT Charge Cloud Webhook",
@@ -125,19 +126,20 @@ const zendeskTicketCreation = async (body: string, priority: string) => {
 const errCaseHandle: errCaseFunction = async ({
   lastTimestampInfo,
   data,
-  body,
+  html_body,
+  reason,
   priority,
   transaction,
 }) => {
   let transactionTimestampId, createObj, result, transObj, chargeStationObj;
 
-  await zendeskTicketCreation(body, priority);
-  if (lastTimestampInfo?.evse_status_code === "255") {
+  await zendeskTicketCreation(html_body, priority); 
+  if (lastTimestampInfo?.transaction_timestamps_id! !== undefined) {
+    transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id!;
+  } else {
     const transactionTimestampInfo =
       await transactionTimestampServices.createTransactionTimestamp();
     transactionTimestampId = transactionTimestampInfo?.transaction_timestamp_id;
-  } else {
-    transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id!;
   }
   createObj = createInsertObj(data, transactionTimestampId);
   result = await evChargerTimestampsServices.createEVChargerTimestamp(
@@ -146,7 +148,7 @@ const errCaseHandle: errCaseFunction = async ({
   );
   transObj = {
     transaction_timestamp_id: transactionTimestampId!,
-    transaction_stop_reason: body,
+    transaction_stop_reason: reason,
   };
   chargeStationObj = null;
 
@@ -170,7 +172,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
       transObj: Partial<EVChargeStationTransAttributes> | null,
       chargeStationObj: Partial<ChargeStationsAttributes> | null,
       result: Partial<EventTimestampsAttributes>;
-    let body: string, priority: string;
+    let html_body: string, reason: string, priority: string;
     let transactionTimestampId: number | null;
     let errCaseResult: { [key: string]: any } | null = null;
 
@@ -247,102 +249,108 @@ const createWebHook: RequestHandler = async (req, res, next) => {
 
     switch (data["EVSE Status Code"]) {
       case "4":
-        body = "Vent Required";
+        reason = "Vent Required";
+        html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "normal";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "5":
-        body = "Diode Check Failed";
+        reason = " Diode Check Failed";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "normal";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "6":
-        body = "GFCI Fault";
+        reason = "GFCI Fault";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "high";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "7":
-        body = "Bad Ground";
+        reason = "Bad Ground";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "normal";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "8":
-        body = "Stuck Relay";
+        reason = "Stuck Relay";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "high";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "9":
-        body = "GFI Self-Test Failure";
+        reason = "GFI Self-Test Failure";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "urgent";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
       case "10":
-        body = "Over Temperature Error Shutdown";
+        reason = "Vent Required";
+        html_body =
+          html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "urgent";
         errCaseResult = await errCaseHandle({
           lastTimestampInfo,
           data,
-          body,
+          html_body,
+          reason,
           priority,
           transaction,
         });
         break;
-      case "255":
-        transactionTimestampId = null;
-        createObj = createInsertObj(data, transactionTimestampId);
-        result = await evChargerTimestampsServices.createEVChargerTimestamp(
-          createObj,
-          transaction
-        );
-        transObj = null;
-        chargeStationObj = null;
-        break;
       case "1":
-        if (lastTimestampInfo?.evse_status_code === "255") {
-          const transactionTimestampInfo =
-            await transactionTimestampServices.createTransactionTimestamp();
-          transactionTimestampId =
-            transactionTimestampInfo?.transaction_timestamp_id;
-        } else {
-          transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
-        }
-        createObj = createInsertObj(data, transactionTimestampId);
+        const transactionTimestampInfo =
+          await transactionTimestampServices.createTransactionTimestamp();
+        transactionTimestampId =
+          transactionTimestampInfo?.transaction_timestamp_id;
+        createObj = createInsertObj(data, transactionTimestampId!);
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
           transaction
@@ -381,60 +389,27 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           lastTimestampInfo?.evse_status_code === "254" ||
           lastTimestampInfo?.evse_status_code === "3"
         ) {
-          const allTimestampsForOneSession =
-            await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
-              transactionTimestampId!,
-              data["Serial Number"]
-            );
-
-          const eventDuration = moment(
-            allTimestampsForOneSession[0].status_change_timestamp
-          ).diff(
-            moment(
-              allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
-                .status_change_timestamp
-            ),
-            "minutes",
-            true
-          );
-
-          const { status_change_timestamp: notPluggedTimestamp } =
-            allTimestampsForOneSession.find(
-              (timeStamp: EVChargerTimestampsAttributes) =>
-                timeStamp.evse_status_code === "1"
-            ) ?? {};
-          const { status_change_timestamp: pluggedTimestamp } =
-            allTimestampsForOneSession.find(
-              (timeStamp: EVChargerTimestampsAttributes) =>
-                timeStamp.evse_status_code === "2"
-            ) ?? {};
-          const { status_change_timestamp: chargingStartTimestamp } =
-            allTimestampsForOneSession.find(
-              (timeStamp: EVChargerTimestampsAttributes) =>
-                timeStamp.evse_status_code === "3"
-            ) ?? {};
-          const energyUsage = (208 * data["EVSE Max Current"]) / 1000;
           transObj = {
             transaction_timestamp_id: transactionTimestampId!,
-            transaction_status: "ended",
+            transaction_status: "Ended",
             connector_status: "Occupied",
-            event_start:
-              allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
-                .status_change_timestamp,
-            event_end: allTimestampsForOneSession[0].status_change_timestamp,
-            event_duration: eventDuration,
-            meter_start: chargingStartTimestamp
-              ? chargingStartTimestamp
-              : pluggedTimestamp
-              ? pluggedTimestamp
-              : notPluggedTimestamp,
-            meter_end: allTimestampsForOneSession[0].status_change_timestamp,
-            kwh_session: (eventDuration / 60) * energyUsage,
+            meter_end: createObj.status_change_timestamp,
             transaction_stop_reason: "normal",
           };
           chargeStationObj = {
-            charge_station_status: "Connected",
+            charge_station_status: "“Connected",
           };
+          const evChargerStationTran =
+            await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
+              transactionTimestampId!
+            );
+          if (evChargerStationTran.length > 0) {
+            await evChargerStationTransServices.editEVChargeStationTrans(
+              transObj!,
+              evChargerStationTran[0]?.charge_record_id,
+              transaction
+            );
+          }
         } else if (lastTimestampInfo?.evse_status_code === "255") {
           transObj = {
             transaction_timestamp_id: transactionTimestampId!,
@@ -485,9 +460,13 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           chargeStationObj = {
             charge_station_status: "Charging",
           };
+          await evChargerStationTransServices.createEVChargeStationTrans(
+            transObj!
+          );
         }
         break;
       case "254":
+      case "255":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
@@ -499,17 +478,57 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             data["Serial Number"],
             transaction
           );
-        transObj = {
-          transaction_timestamp_id: transactionTimestampId!,
-          transaction_status: "ended",
-          connector_status: "Available",
-          event_end: data["status_change_timestamp"],
-          transaction_stop_reason: "normal",
-        };
-        if (lastTimestampInfo?.evse_status_code === "3") {
+        if (lastTimestampInfo?.evse_status_code === "2") {
+          const allTimestampsForOneSession =
+            await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
+              transactionTimestampId!,
+              data["Serial Number"]
+            );
+          const eventDuration = moment(
+            allTimestampsForOneSession[0].status_change_timestamp
+          ).diff(
+            moment(
+              allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
+                .status_change_timestamp
+            ),
+            "minutes",
+            true
+          );
+          const { status_change_timestamp: chargingStartTimestamp } =
+            allTimestampsForOneSession.find(
+              (timeStamp: EVChargerTimestampsAttributes) =>
+                timeStamp.evse_status_code === "3"
+            ) ?? {};
+          const energyUsage = (208 * data["EVSE Max Current"]) / 1000;
+          if (chargingStartTimestamp) {
+            transObj = {
+              transaction_timestamp_id: transactionTimestampId!,
+              transaction_status: "Ended",
+              connector_status: "Available",
+              event_end: allTimestampsForOneSession[0].status_change_timestamp,
+              event_duration: eventDuration,
+              meter_start: chargingStartTimestamp,
+              meter_end: allTimestampsForOneSession[0].status_change_timestamp,
+              kwh_session: (eventDuration / 60) * energyUsage,
+              transaction_stop_reason: "normal",
+            };
+          } else {
+            transObj = {
+              transaction_timestamp_id: transactionTimestampId!,
+              transaction_status: "Ended",
+              connector_status: "Available",
+              event_end: allTimestampsForOneSession[0].status_change_timestamp,
+              event_duration: eventDuration,
+              kwh_session: (eventDuration / 60) * energyUsage,
+              transaction_stop_reason: "normal",
+            };
+          }
+        } else {
           transObj = {
-            ...transObj,
-            meter_end: data["status_change_timestamp"],
+            transaction_timestamp_id: transactionTimestampId!,
+            transaction_status: "Ended",
+            connector_status: "Available",
+            transaction_stop_reason: "normal",
           };
         }
         chargeStationObj = {
@@ -526,14 +545,15 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     }
 
     if (transObj!) {
-      const evChargerStationTran =
-        await evChargerStationTransServices.getEVChargeStationTransByTransactionTimestampId(
+      let evChargerStationTran =
+        await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
           transactionTimestampId!
         );
-      if (evChargerStationTran) {
+      if (evChargerStationTran.length > 0) {
         await evChargerStationTransServices.editEVChargeStationTrans(
           transObj!,
-          evChargerStationTran?.charge_record_id,
+          evChargerStationTran[evChargerStationTran.length - 1]
+            ?.charge_record_id,
           transaction
         );
       } else {

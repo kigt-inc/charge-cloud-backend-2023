@@ -37,7 +37,7 @@ const getAllEVChargeStationTrans = async (params: { [key: string]: any }) => {
 
 /* Create new EVChargeStationTrans*/
 const createEVChargeStationTrans = async (
-  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>,
+  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>
 ) => {
   const { EVChargeStationTrans } = Models;
   let evChargerStationTransCreated = await EVChargeStationTrans.create(
@@ -98,14 +98,15 @@ const getEVChargeStationTrans = async (id: string) => {
 };
 
 /* get EVChargeStationTrans by id */
-const getEVChargeStationTransByTransactionTimestampId = async (
-  id: number
+const getAllEVChargeStationTransByTransactionTimestampId = async (
+  id: number,
 ) => {
   const { EVChargeStationTrans } = Models;
-  const evChargerStationTrans = await EVChargeStationTrans.findOne({
+  const evChargerStationTrans = await EVChargeStationTrans.findAll({
     where: {
       transaction_timestamp_id: id,
     },
+    order: [["createdAt", "DESC"]],
     raw: true,
   });
 
@@ -130,5 +131,5 @@ export default {
   editEVChargeStationTrans,
   getEVChargeStationTrans,
   deleteEVChargeStationTrans,
-  getEVChargeStationTransByTransactionTimestampId,
+  getAllEVChargeStationTransByTransactionTimestampId,
 };
