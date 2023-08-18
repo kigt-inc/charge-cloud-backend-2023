@@ -133,7 +133,7 @@ const errCaseHandle: errCaseFunction = async ({
 }) => {
   let transactionTimestampId, createObj, result, transObj, chargeStationObj;
 
-  await zendeskTicketCreation(html_body, priority); 
+  await zendeskTicketCreation(html_body, priority);
   if (lastTimestampInfo?.transaction_timestamps_id! !== undefined) {
     transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id!;
   } else {
@@ -404,8 +404,22 @@ const createWebHook: RequestHandler = async (req, res, next) => {
               transactionTimestampId!
             );
           if (evChargerStationTran.length > 0) {
+            const energyUsage = (208 * data["EVSE Max Current"]) / 1000;
+            const subEventDuration = moment(
+              data["status_change_timestamp"]
+            ).diff(
+              moment(evChargerStationTran[0]?.event_start),
+              "minutes",
+              true
+            );
+            const subTransObj = {
+              ...transObj,
+              event_end: data["status_change_timestamp"],
+              event_duration: subEventDuration,
+              kwh_session: (subEventDuration / 60) * energyUsage,
+            };
             await evChargerStationTransServices.editEVChargeStationTrans(
-              transObj!,
+              subTransObj!,
               evChargerStationTran[0]?.charge_record_id,
               transaction
             );
@@ -460,8 +474,12 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           chargeStationObj = {
             charge_station_status: "Charging",
           };
+          const subTransObj = {
+            ...transObj,
+            event_start: data["status_change_timestamp"],
+          };
           await evChargerStationTransServices.createEVChargeStationTrans(
-            transObj!
+            subTransObj!
           );
         }
         break;
