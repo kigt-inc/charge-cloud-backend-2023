@@ -5,7 +5,7 @@ export interface LocationsAttributes {
   utility_id: number;
   co2_certificate_agency_id: number;
   location_name: string;
-  Rate_Type: string;
+  rate_type: string;
   client_id: number;
   addr_l1: string;
   addr_l2: string;

@@ -36,7 +36,7 @@ const Location = sequelize.define<LocationsModel>(
         },
       },
     },
-    Rate_Type: {
+    rate_type: {
       type: Sequelize.STRING(1),
       allowNull: false,
     },

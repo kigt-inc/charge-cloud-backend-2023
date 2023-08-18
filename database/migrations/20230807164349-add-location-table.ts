@@ -39,7 +39,7 @@ module.exports = {
               },
             },
           },
-          Rate_Type: {
+          rate_type: {
             type: Sequelize.STRING(1),
             allowNull: false,
           },
