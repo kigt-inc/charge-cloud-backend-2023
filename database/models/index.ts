@@ -6,6 +6,7 @@ import EVChargeStationTrans from "./evChargerStationTrans";
 import EVChargerTimestamp from "./evChargerTimestamp";
 import Location from "./location";
 import Merchant from "./merchant";
+import Role from "./role";
 import { relations } from "./modelRelations";
 import TransactionTimestamp from "./transactionTimestamp";
 
@@ -18,7 +19,8 @@ const Models = relations.associateRelationships({
   TransactionTimestamp,
   Client,
   EVChargeStationTrans,
-  Location
+  Location,
+  Role,
 });
 
 export default Models;

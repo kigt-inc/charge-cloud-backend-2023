@@ -2,6 +2,7 @@ import express from "express";
 let router = express.Router();
 import _ from "lodash";
 import webhookRoutes from "./webhook";
+import locationRoutes from "./location";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -20,5 +21,8 @@ router.get("/api/", (req, res, next) => {
 
 /* WebHook routes */
 router.use("/api/webhook", webhookRoutes);
+
+/* location routes */
+router.use("/api/location", locationRoutes);
 
 export default router;

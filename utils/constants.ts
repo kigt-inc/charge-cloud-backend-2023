@@ -32,4 +32,6 @@ export default {
     GOOGLE: "google",
     MICROSOFT: "microsoft",
   },
+  LOCATION_CREATED: "location created",
+  LOCATION_DELETED: "location deleted",
 };
