@@ -34,6 +34,7 @@ export interface EVChargeStationTransAttributes {
   offline_indicator: string;
   authorized_indicator: string;
   realtime_db_id_type: string;
+  createdAt?: Date
 }
 
 export type EVChargeStationTransModel = Model<EVChargeStationTransAttributes> &
