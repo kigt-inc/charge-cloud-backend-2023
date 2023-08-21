@@ -1,5 +1,5 @@
 import express from "express";
-// import adminAuth from "../middleware/adminAuth";
+import auth from "../middlewares/auth";
 import locationController from "../controllers/location";
 
 const router = express.Router();
@@ -9,31 +9,31 @@ const router = express.Router();
 /* For Create New Site Owner */
 router.post(
   "/",
-//   [adminAuth.verifyToken, adminAuth.isAdmin],
+  [auth.verifyToken, auth.isSuperAdmin],
   locationController.createLocation
 );
 /* For Edit Site Owner */
 router.put(
   "/:id",
-//   [adminAuth.verifyToken, adminAuth.isAdmin],
+  [auth.verifyToken, auth.isSuperAdmin],
   locationController.editLocation
 );
 /* For Delete Site Owner */
 router.delete(
   "/:id",
-//   [adminAuth.verifyToken, adminAuth.isAdmin],
+  [auth.verifyToken, auth.isSuperAdmin],
   locationController.deleteLocation
 );
 /* For List Site Owner */
 router.get(
   "/",
-//   [adminAuth.verifyToken, adminAuth.isAdminOrUser],
+  [auth.verifyToken, auth.isSuperAdminOrClient],
   locationController.listLocations
 );
 /* For get Site Owner by id */
 router.get(
   "/:id",
-//   [adminAuth.verifyToken, adminAuth.isAdminOrUser],
+  [auth.verifyToken, auth.isSuperAdminOrClient],
   locationController.getLocation
 );
 

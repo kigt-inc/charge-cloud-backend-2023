@@ -32,19 +32,11 @@ module.exports = {
           },
           user_function_role_entitlements_id: {
             type: Sequelize.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
               model: "user_function_entitlements",
               key: "user_function_entitlements_id",
             },
-          },
-          role_status: {
-            type: Sequelize.STRING(1),
-            allowNull: false,
-          },
-          date_changes: {
-            type: Sequelize.DATE,
-            allowNull: false,
           },
           createdAt: {
             allowNull: false,
