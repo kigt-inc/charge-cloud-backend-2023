@@ -75,7 +75,7 @@ const editClient = async (
 };
 
 /* get Client by id */
-const getClient = async (id: string) => {
+const getClient = async (id: number) => {
   const { Client } = Models;
   const client = await Client.findOne({
     where: {

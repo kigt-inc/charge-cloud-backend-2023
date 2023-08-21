@@ -3,6 +3,7 @@ let router = express.Router();
 import _ from "lodash";
 import webhookRoutes from "./webhook";
 import locationRoutes from "./location";
+import userRoutes from "./user";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -24,5 +25,8 @@ router.use("/api/webhook", webhookRoutes);
 
 /* location routes */
 router.use("/api/location", locationRoutes);
+
+/* user routes */
+router.use("/api/user", userRoutes);
 
 export default router;

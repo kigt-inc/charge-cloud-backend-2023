@@ -4,9 +4,14 @@ import { getPagination } from "../utils/helpers";
 import Sequelize, { Transaction } from "sequelize";
 import { LocationsAttributes } from "../types/location";
 import CONSTANTS from "../utils/constants";
+import userServices from "./user";
 
-const getAllLocations = async (params: { [key: string]: any }) => {
-  const { Location } = Models;
+const getAllLocations = async (
+  params: { [key: string]: any },
+  role: string,
+  userId: number
+) => {
+  const { Location, ChargeStation } = Models;
   const { limit, offset } = getPagination(params?.page, params?.limit, 10);
   const searchObj = params?.search
     ? {
@@ -15,11 +20,26 @@ const getAllLocations = async (params: { [key: string]: any }) => {
         },
       }
     : {};
-  const where = {
+  let where: { [key: string]: any } = {
     ...searchObj,
   };
-  let locations = await Location.findAndCountAll({
+
+  if (role === CONSTANTS.ROLES.CLIENT) {
+    const user = await userServices.getUser(userId);
+    where = {
+      ...where,
+      client_id: user.client_id,
+    };
+  }
+
+  const locations = await Location.findAndCountAll({
     where,
+    include: [
+      {
+        model: ChargeStation,
+        as: "chargeStations",
+      },
+    ],
     limit,
     offset,
     order: [
@@ -27,7 +47,7 @@ const getAllLocations = async (params: { [key: string]: any }) => {
         ? [params.sortBy, params.order]
         : ["createdAt", "DESC"],
     ],
-    raw: true,
+    distinct: true,
   });
 
   return { data: locations?.rows, count: locations?.count };
@@ -77,12 +97,17 @@ const editLocation = async (
 
 /* get location by id */
 const getLocation = async (id: string) => {
-  const { Location } = Models;
+  const { Location, ChargeStation } = Models;
   const location = await Location.findOne({
     where: {
       location_id: id,
     },
-    raw: true,
+    include: [
+      {
+        model: ChargeStation,
+        as: "chargeStations",
+      },
+    ],
   });
 
   return location || null;
@@ -189,6 +214,19 @@ const locationValidation = async (locationObj: LocationsAttributes) => {
       },
     };
     return validationResponse;
+  } else if (
+    typeof locationObj?.location_max_reservation !== "number" ||
+    locationObj.location_max_reservation === undefined
+  ) {
+    validationResponse = {
+      isValid: false,
+      message: {
+        isSuccess: false,
+        data: [],
+        message: `location max reservation ${CONSTANTS.IS_MANDATORY_FIELD} and should be number`,
+      },
+    };
+    return validationResponse;
   } else {
     validationResponse = {
       isValid: true,
@@ -203,5 +241,5 @@ export default {
   editLocation,
   getLocation,
   deleteLocation,
-  locationValidation,
+  locationValidation
 };

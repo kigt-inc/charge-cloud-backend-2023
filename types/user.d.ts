@@ -14,6 +14,7 @@ export interface UsersAttributes {
   exp_date: Date;
   online_access: string;
   cust_admin: string;
+  role?: string
 }
 
 export type UsersModel = Model<UsersAttributes> & UsersAttributes;

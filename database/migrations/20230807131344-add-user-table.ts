@@ -15,7 +15,7 @@ module.exports = {
           },
           client_id: {
             type: Sequelize.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
               model: "clients",
               key: "client_id",
@@ -24,6 +24,7 @@ module.exports = {
           user_status: {
             type: Sequelize.STRING(9),
             allowNull: false,
+            defaultValue: "active",
           },
           password: {
             type: Sequelize.STRING,
@@ -67,13 +68,15 @@ module.exports = {
           },
           type: {
             type: Sequelize.STRING(8),
-            allowNull: false,
+            allowNull: true,
           },
           reset_link_token: {
             type: Sequelize.STRING,
+            allowNull: true,
           },
           exp_date: {
             type: Sequelize.DATE,
+            allowNull: true,
           },
           online_access: {
             type: Sequelize.STRING(1),

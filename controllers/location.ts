@@ -42,7 +42,7 @@ const createLocation: RequestHandler = async (req, res, next) => {
 const listLocations: RequestHandler = async (req, res, next) => {
   try {
     const params = req.query;
-    const { data, count } = await locationServices.getAllLocations(params);
+    const { data, count } = await locationServices.getAllLocations(params,req.role,req.id);
     return res.status(200).json({
       isSuccess: true,
       data,
@@ -64,7 +64,7 @@ const editLocation: RequestHandler = async (req, res, next) => {
   try {
     const locationId = req.params.id;
     if (!locationId) {
-      transaction.rollback();
+      await transaction.rollback();
       return res.status(403).send({
         isSuccess: false,
         data: {},
@@ -88,14 +88,14 @@ const editLocation: RequestHandler = async (req, res, next) => {
       );
 
       if (!updatedLocation) {
-        transaction.rollback();
+        await transaction.rollback();
         return res.status(400).json({
           isSuccess: false,
           data: {},
           message: CONSTANTS.NOT_FOUND,
         });
       }
-      transaction.commit();
+      await transaction.commit();
       res.status(201).json({
         isSuccess: true,
         data: updatedLocation,
@@ -104,7 +104,7 @@ const editLocation: RequestHandler = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    transaction.rollback();
+    await transaction.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,
