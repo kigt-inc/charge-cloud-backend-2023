@@ -6,31 +6,31 @@ const router = express.Router();
 
 /* Token Protected Routes */
 
-/* For Create New Site Owner */
+/* For Create New Location */
 router.post(
   "/",
   [auth.verifyToken, auth.isSuperAdmin],
   locationController.createLocation
 );
-/* For Edit Site Owner */
+/* For Edit Location */
 router.put(
   "/:id",
   [auth.verifyToken, auth.isSuperAdmin],
   locationController.editLocation
 );
-/* For Delete Site Owner */
+/* For Delete Location */
 router.delete(
   "/:id",
   [auth.verifyToken, auth.isSuperAdmin],
   locationController.deleteLocation
 );
-/* For List Site Owner */
+/* For List Location */
 router.get(
   "/",
   [auth.verifyToken, auth.isSuperAdminOrClient],
   locationController.listLocations
 );
-/* For get Site Owner by id */
+/* For get Location by id */
 router.get(
   "/:id",
   [auth.verifyToken, auth.isSuperAdminOrClient],

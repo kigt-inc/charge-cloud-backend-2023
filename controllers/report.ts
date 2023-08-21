@@ -81,29 +81,7 @@ const generatedRevenueReport: RequestHandler = async (req, res, next) => {
   }
 };
 
-/* Create new location */
-const chargesReport: RequestHandler = async (req, res, next) => {
-  try {
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.DATA_FETCHED,
-    });
-  } catch (error: any) {
-    let errorMessage;
-    if (error?.name == "SequelizeUniqueConstraintError") {
-      errorMessage = error?.errors[0]?.message;
-    }
-    res.status(500).json({
-      isSuccess: false,
-      data: {},
-      message: errorMessage ? errorMessage : CONSTANTS.INTERNAL_SERVER_ERROR,
-    });
-  }
-};
-
 export default {
   energyUtilizationReport,
   generatedRevenueReport,
-  chargesReport,
 };
