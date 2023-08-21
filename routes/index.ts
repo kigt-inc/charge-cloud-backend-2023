@@ -4,6 +4,7 @@ import _ from "lodash";
 import webhookRoutes from "./webhook";
 import locationRoutes from "./location";
 import userRoutes from "./user";
+import reportRoutes from "./report"
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -28,5 +29,8 @@ router.use("/api/location", locationRoutes);
 
 /* user routes */
 router.use("/api/user", userRoutes);
+
+/* report routes */
+router.use("/api/report", reportRoutes);
 
 export default router;
