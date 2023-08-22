@@ -4,7 +4,8 @@ import _ from "lodash";
 import webhookRoutes from "./webhook";
 import locationRoutes from "./location";
 import userRoutes from "./user";
-import reportRoutes from "./report"
+import reportRoutes from "./report";
+import zendeskRoutes from "./zendesk";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -32,5 +33,8 @@ router.use("/api/user", userRoutes);
 
 /* report routes */
 router.use("/api/report", reportRoutes);
+
+/* zendesk routes */
+router.use("/api/zendesk", zendeskRoutes);
 
 export default router;
