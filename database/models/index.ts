@@ -9,6 +9,7 @@ import Merchant from "./merchant";
 import Role from "./role";
 import UserRole from "./userRole";
 import User from "./user";
+import UserTicket from "./userTicket";
 import { relations } from "./modelRelations";
 import TransactionTimestamp from "./transactionTimestamp";
 
@@ -25,6 +26,7 @@ const Models = relations.associateRelationships({
   Role,
   UserRole,
   User,
+  UserTicket,
 });
 
 export default Models;
