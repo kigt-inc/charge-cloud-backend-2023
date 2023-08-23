@@ -13,14 +13,6 @@ const User = sequelize.define<UsersModel>(
       autoIncrement: true,
       allowNull: false,
     },
-    client_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: {
-        model: "clients",
-        key: "client_id",
-      },
-    },
     user_status: {
       type: Sequelize.STRING(9),
       allowNull: false,

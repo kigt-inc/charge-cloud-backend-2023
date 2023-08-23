@@ -26,10 +26,14 @@ const getAllLocations = async (
 
   if (role === CONSTANTS.ROLES.CLIENT) {
     const user = await userServices.getUser(userId);
-    where = {
-      ...where,
-      client_id: user.client_id,
-    };
+    if (user.client_id) {
+      where = {
+        ...where,
+        client_id: user.client_id,
+      };
+    } else {
+      return { data: [], count: 0 };
+    }
   }
 
   const locations = await Location.findAndCountAll({
@@ -241,5 +245,5 @@ export default {
   editLocation,
   getLocation,
   deleteLocation,
-  locationValidation
+  locationValidation,
 };

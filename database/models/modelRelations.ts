@@ -38,6 +38,17 @@ export const relations = {
       foreignKey: "client_id",
       sourceKey: "client_id",
     });
+
+    Models.User.hasOne(Models.Client, {
+      foreignKey: "user_id",
+      as: "client",
+    });
+
+    Models.Client.hasOne(Models.User, {
+      foreignKey: "user_id",
+      sourceKey: "user_id",
+      as: "user"
+    });
     return Models;
   },
 };

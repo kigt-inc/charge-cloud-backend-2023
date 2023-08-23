@@ -2,6 +2,7 @@ import { Model } from "sequelize";
 
 export interface ClientsAttributes {
   client_id: number;
+  user_id: number;
   client_type: string;
   client_name: string;
   client_addr1: string;
