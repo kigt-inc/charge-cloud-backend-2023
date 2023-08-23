@@ -3,6 +3,7 @@ import Models from "../database/models/index";
 import { getPagination } from "../utils/helpers";
 import Sequelize, { Transaction } from "sequelize";
 import { ChargeStationsAttributes } from "../types/chargeStation";
+import CONSTANTS from "../utils/constants";
 
 const getAllChargeStations = async (params: { [key: string]: any }) => {
   const { ChargeStation } = Models;
@@ -118,6 +119,78 @@ const deleteChargeStation = async (id: string) => {
   return chargeStationDeleted;
 };
 
+// charge station validation
+const chargeStationValidation = async (
+  chargeStationObj: Partial<ChargeStationsAttributes>
+) => {
+  type requiredFieldsAttr = keyof Partial<ChargeStationsAttributes>;
+  const requiredFields: requiredFieldsAttr[] = [
+    "ev_charger_serial_no",
+    "site_location_identifier",
+    "ev_charger_desc",
+    "evse_serial_no",
+    "terminal_serial_No",
+    "interface_serial_no",
+    "kiosk_id",
+    "product_type",
+    "evse_app_screen",
+    "evse_payment_state",
+    "evse_quickpay",
+    "evse_status_code",
+    "evse_throttled",
+    "evse_max_current",
+    "evse_temperature",
+    "evse_current",
+    "evse_last_charging_timeStamp",
+    "evse_connected_interface",
+    "evse_voltage",
+    "remote_log",
+    "mac_address",
+    "occupancy_detector",
+    "connector_electrical_type",
+    "connector_type",
+    "charge_station_status",
+    "connector_status",
+  ];
+
+  for (const field of requiredFields) {
+    const value = chargeStationObj[field];
+
+    if (value === undefined || value === "") {
+      return {
+        isValid: false,
+        message: {
+          isSuccess: false,
+          data: [],
+          message: `${field} ${CONSTANTS.IS_MANDATORY_FIELD}`,
+        },
+      };
+    }
+
+    if (
+      (field.startsWith("evse_") ||
+        field.startsWith("terminal_") ||
+        field.startsWith("interface_") ||
+        field === "kiosk_id" ||
+        field.endsWith("_current") ||
+        field.endsWith("_voltage") ||
+        field === "evse_status_code") &&
+      typeof value !== "number"
+    ) {
+      return {
+        isValid: false,
+        message: {
+          isSuccess: false,
+          data: [],
+          message: `${field} ${CONSTANTS.IS_MANDATORY_FIELD} and should be number`,
+        },
+      };
+    }
+  }
+
+  return { isValid: true };
+};
+
 export default {
   getAllChargeStations,
   createChargeStation,
@@ -125,4 +198,5 @@ export default {
   getChargeStation,
   deleteChargeStation,
   getChargeStationBySerialNo,
+  chargeStationValidation,
 };

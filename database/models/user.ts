@@ -2,6 +2,7 @@ import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { UsersModel } from "../../types/user";
 import bcrypt from "bcrypt"
+import moment from "moment";
 
 const User = sequelize.define<UsersModel>(
   "users",
@@ -88,11 +89,29 @@ const User = sequelize.define<UsersModel>(
       type: Sequelize.STRING(1),
       allowNull: false,
     },
+    deleted_timestamp: {
+      type: Sequelize.STRING(100),
+      defaultValue: "0",
+      allowNull: false,
+    },
   },
   {
     tableName: "users",
     paranoid: true,
     timestamps: true,
+    hooks: {
+      beforeDestroy: async function (user, fn) {
+        await User.update(
+          { deleted_timestamp: moment().unix().toString() },
+          {
+            where: {
+              user_id: user.user_id,
+            },
+            transaction: fn.transaction,
+          }
+        );
+      },
+    },
   }
 );
 

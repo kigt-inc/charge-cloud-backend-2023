@@ -163,7 +163,7 @@ const deleteUser: RequestHandler = async (req, res, next) => {
     let userDeleted = await userServices.deleteUser(Number(userId));
     res.status(200).json({
       isSuccess: true,
-      data: userDeleted,
+      data: {},
       message: CONSTANTS.USER_DELETED,
     });
     next();
