@@ -168,12 +168,13 @@ const chargeStationValidation = async (
     }
 
     if (
-      (field.startsWith("evse_") ||
-        field.startsWith("terminal_") ||
+      (field.startsWith("terminal_") ||
         field.startsWith("interface_") ||
         field === "kiosk_id" ||
         field.endsWith("_current") ||
+        field.endsWith("_temperature") ||
         field.endsWith("_voltage") ||
+        field === "evse_serial_no" ||
         field === "evse_status_code") &&
       typeof value !== "number"
     ) {

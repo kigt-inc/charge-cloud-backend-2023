@@ -305,7 +305,7 @@ const getUser = async (
   userId: number,
   status: string[] | string = CONSTANTS.STATUS
 ) => {
-  const { User, Role, UserRole } = Models;
+  const { User, Role, UserRole, Client } = Models;
   let user = await User.findOne({
     where: {
       user_id: userId,
@@ -317,14 +317,21 @@ const getUser = async (
         attributes: [],
         include: [{ model: Role, attributes: ["role_name"] }],
       },
+      {
+        model: Client,
+        attributes: ["client_id"],
+        as: "client",
+      },
     ],
     raw: true,
   });
   if (user) {
     user.role = user["user_roles.role.role_name"];
+    user.client_id = user["client.client_id"];
     user = _.omit(user, [
       "user_roles.role.role_id",
       "user_roles.role.role_name",
+      "client.client_id"
     ]);
     return user;
   } else {

@@ -6,6 +6,8 @@ import locationRoutes from "./location";
 import userRoutes from "./user";
 import reportRoutes from "./report";
 import zendeskRoutes from "./zendesk";
+import clientRoutes from "./client";
+import chargeStationRoutes from "./chargeStation";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -36,5 +38,11 @@ router.use("/api/report", reportRoutes);
 
 /* zendesk routes */
 router.use("/api/zendesk", zendeskRoutes);
+
+/* client routes */
+router.use("/api/client", clientRoutes);
+
+/* charge station routes */
+router.use("/api/chargestation", chargeStationRoutes);
 
 export default router;
