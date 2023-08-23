@@ -36,6 +36,8 @@ export default {
   LOCATION_CREATED: "location created",
   LOCATION_DELETED: "location deleted",
   TICKET_CREATED: "ticket created",
+  CHARGE_STATION_CREATED: "charge station created",
+  CHARGE_STATION_DELETED: "charge station deleted",
   PLEASE_PROVIDE_VALID: "Please provide valid",
   STATUS: ["active", "inactive"],
   USER_CREATED: "User created",
