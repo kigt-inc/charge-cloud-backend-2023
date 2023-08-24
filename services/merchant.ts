@@ -3,9 +3,10 @@ import Models from "../database/models/index";
 import { getPagination } from "../utils/helpers";
 import Sequelize, { Transaction } from "sequelize";
 import { MerchantsAttributes } from "../types/merchant";
+import CONSTANTS from "../utils/constants";
 
 const getAllMerchants = async (params: { [key: string]: any }) => {
-  const { Merchant } = Models;
+  const { Merchant, User } = Models;
   const { limit, offset } = getPagination(params?.page, params?.limit, 10);
   const searchObj = params?.search
     ? {
@@ -19,6 +20,13 @@ const getAllMerchants = async (params: { [key: string]: any }) => {
   };
   let merchants = await Merchant.findAndCountAll({
     where,
+    include: [
+      {
+        model: User,
+        attributes: ["user_id", "first_name", "last_name"],
+        as: "users",
+      },
+    ],
     limit,
     offset,
     order: [
@@ -26,7 +34,7 @@ const getAllMerchants = async (params: { [key: string]: any }) => {
         ? [params.sortBy, params.order]
         : ["createdAt", "DESC"],
     ],
-    raw: true,
+    distinct: true,
   });
 
   return { data: merchants?.rows, count: merchants?.count };
@@ -76,12 +84,18 @@ const editMerchant = async (
 
 /* get merchant by id */
 const getMerchant = async (id: string) => {
-  const { Merchant } = Models;
+  const { Merchant, User } = Models;
   const merchant = await Merchant.findOne({
     where: {
       merchant_id: id,
     },
-    raw: true,
+    include: [
+      {
+        model: User,
+        attributes: ["user_id", "first_name", "last_name"],
+        as: "users",
+      },
+    ],
   });
 
   return merchant || null;
@@ -99,10 +113,34 @@ const deleteMerchant = async (id: string) => {
   return merchantDeleted;
 };
 
+/*merchant validation */
+const merchantValidation = async (params: Partial<MerchantsAttributes>) => {
+  let validationResponse;
+  if (params.merchant_name === "" || params.merchant_name === undefined) {
+    validationResponse = {
+      isValid: false,
+      message: {
+        isSuccess: false,
+        data: [],
+        message: `${CONSTANTS.PLEASE_PROVIDE_VALID} merchantName ${CONSTANTS.IS_MANDATORY_FIELD}`,
+      },
+    };
+
+    return validationResponse;
+  } else {
+    validationResponse = {
+      isValid: true,
+    };
+  }
+
+  return validationResponse;
+};
+
 export default {
   getAllMerchants,
   createMerchant,
   editMerchant,
   getMerchant,
   deleteMerchant,
+  merchantValidation,
 };

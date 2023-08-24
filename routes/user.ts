@@ -15,29 +15,33 @@ router.post("/signin", userController.signin);
 /* Super Admin User Rest API Routes */
 
 /* For Create New User as */
-router.post("/", [auth.verifyToken, auth.isSuperAdmin], userController.signup);
+router.post(
+  "/",
+  [auth.verifyToken, auth.isSuperAdminOrUser],
+  userController.signup
+);
 /* For Edit User */
 router.put(
   "/:id",
-  [auth.verifyToken, auth.isSuperAdmin],
+  [auth.verifyToken, auth.isSuperAdminOrUser],
   userController.editUser
 );
 /* For Delete User */
 router.delete(
   "/:id",
-  [auth.verifyToken, auth.isSuperAdmin],
+  [auth.verifyToken, auth.isSuperAdminOrUser],
   userController.deleteUser
 );
 /* For List User */
 router.get(
   "/",
-  [auth.verifyToken, auth.isSuperAdminOrClient],
+  [auth.verifyToken, auth.isSuperAdminOrClientOrUser],
   userController.listUsers
 );
 /* For Change Status active / inactive */
 router.patch(
   "/:id",
-  [auth.verifyToken, auth.isSuperAdmin],
+  [auth.verifyToken, auth.isSuperAdminOrUser],
   userController.patchUserStatus
 );
 

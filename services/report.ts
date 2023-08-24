@@ -3,10 +3,14 @@ import Models from "../database/models/index";
 import Sequelize from "sequelize";
 import moment from "moment";
 import sequelize from "../utils/db-connection";
+import userServices from "../services/user";
+import CONSTANTS from "../utils/constants";
 
 const energyUtilizationReport = async (
   params: { [key: string]: any },
   year: number | null,
+  role: string,
+  userId: number,
   chargesType: boolean
 ) => {
   const { EVChargeStationTrans } = Models;
@@ -33,16 +37,36 @@ const energyUtilizationReport = async (
     ];
   }
 
-  const data = await EVChargeStationTrans.findAll({
-    where: {
-      createdAt: {
-        [Sequelize.Op.gte]: params.from
-          ? params.from
-          : moment().subtract(1, "month").toDate(),
-        [Sequelize.Op.lte]: params.to ? params.to : moment().toDate(),
-      },
-      transaction_status: "Available",
+  let where: { [key: string]: any } = {
+    createdAt: {
+      [Sequelize.Op.gte]: params.from
+        ? params.from
+        : moment().subtract(1, "month").toDate(),
+      [Sequelize.Op.lte]: params.to ? params.to : moment().toDate(),
     },
+    transaction_status: "Available",
+  };
+
+  if (role === CONSTANTS.ROLES.CLIENT) {
+    const user = await userServices.getUser(userId);
+    const chargeStations = user.locations.reduce(
+      (
+        prevChargeStations: number[],
+        { chargeStations }: { chargeStations: { charge_station_id: number }[] }
+      ) => [
+        ...prevChargeStations,
+        ...chargeStations.map(({ charge_station_id }) => charge_station_id),
+      ],
+      []
+    );
+    where = {
+      ...where,
+      charge_station_id: chargeStations,
+    };
+  }
+
+  const data = await EVChargeStationTrans.findAll({
+    where,
     attributes,
     group,
     raw: true,
@@ -73,6 +97,8 @@ const energyUtilizationReport = async (
 
 const generatedRevenueReport = async (
   params: { [key: string]: any },
+  role: string,
+  userId: number,
   year: number | null
 ) => {
   let attributes, group;
@@ -90,17 +116,37 @@ const generatedRevenueReport = async (
     group = ["createdAt"];
   }
 
+  let where: { [key: string]: any } = {
+    createdAt: {
+      [Sequelize.Op.gte]: params.from
+        ? params.from
+        : moment().subtract(1, "month").toDate(),
+      [Sequelize.Op.lte]: params.to ? params.to : moment().toDate(),
+    },
+    transaction_status: "Available",
+  };
+  
+  if (role === CONSTANTS.ROLES.CLIENT) {
+    const user = await userServices.getUser(userId);
+    const chargeStations = user.locations.reduce(
+      (
+        prevChargeStations: number[],
+        { chargeStations }: { chargeStations: { charge_station_id: number }[] }
+      ) => [
+        ...prevChargeStations,
+        ...chargeStations.map(({ charge_station_id }) => charge_station_id),
+      ],
+      []
+    );
+    where = {
+      ...where,
+      charge_station_id: chargeStations,
+    };
+  }
+
   const { EVChargeStationTrans } = Models;
   const data = await EVChargeStationTrans.findAll({
-    where: {
-      createdAt: {
-        [Sequelize.Op.gte]: params.from
-          ? params.from
-          : moment().subtract(1, "month").toDate(),
-        [Sequelize.Op.lte]: params.to ? params.to : moment().toDate(),
-      },
-      transaction_status: "Available",
-    },
+    where,
     attributes,
     group,
     raw: true,

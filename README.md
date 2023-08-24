@@ -50,6 +50,11 @@ create `charge-cloud-backend-2023/.env` environement file in your local system:
 - DB_PASSWORD
 - DB_HOST
 - DB_PORT
+- ZENDESK_USERNAME
+- ZENDESK_API_TOKEN
+- ZENDESK_REMOTE_URL
+- JWT_SECRET_KEY
+- ACCESS_TOKEN_EXPIRY
 
 These are used to establish a connection between the project and the specified MySQL database.
 

@@ -8,6 +8,7 @@ import reportRoutes from "./report";
 import zendeskRoutes from "./zendesk";
 import clientRoutes from "./client";
 import chargeStationRoutes from "./chargeStation";
+import merchantRoutes from "./merchant";
 
 /* middleware to filter and trim all request body */
 router.all("*", (req, res, next) => {
@@ -44,5 +45,8 @@ router.use("/api/client", clientRoutes);
 
 /* charge station routes */
 router.use("/api/chargestation", chargeStationRoutes);
+
+/* merchant routes */
+router.use("/api/merchant", merchantRoutes);
 
 export default router;

@@ -23,6 +23,13 @@ module.exports = {
               updatedAt: Sequelize.fn("now"),
             },
             {
+              role_name: "user",
+              role_description: "user",
+              client_admin: "n",
+              createdAt: Sequelize.fn("now"),
+              updatedAt: Sequelize.fn("now"),
+            },
+            {
               role_name: "superadmin",
               role_description: "superadmin",
               client_admin: "y",

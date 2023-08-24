@@ -77,7 +77,7 @@ const editClient = async (
 
 /* get Client by id */
 const getClient = async (id: number) => {
-  const { Client, User } = Models;
+  const { Client, User, Merchant, Location, ChargeStation } = Models;
   const client = await Client.findOne({
     where: {
       client_id: id,
@@ -87,6 +87,23 @@ const getClient = async (id: number) => {
         model: User,
         attributes: ["user_id", "first_name", "last_name", "email", "phone_no"],
         as: "user",
+        include: [
+          {
+            model: Merchant,
+            attributes: ["merchant_id", "merchant_name"],
+            as: "merchant",
+          },
+        ],
+      },
+      {
+        model: Location,
+        as: "locations",
+        include: [
+          {
+            model: ChargeStation,
+            as: "chargeStations",
+          },
+        ],
       },
     ],
   });

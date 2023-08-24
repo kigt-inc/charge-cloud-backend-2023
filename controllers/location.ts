@@ -78,7 +78,7 @@ const editLocation: RequestHandler = async (req, res, next) => {
       updateObj
     );
     if (checkLocationValidation && !checkLocationValidation.isValid) {
-      transaction.rollback();
+      await transaction.rollback();
       res.status(400).json(checkLocationValidation.message);
     } else {
       let updatedLocation = await locationServices.editLocation(

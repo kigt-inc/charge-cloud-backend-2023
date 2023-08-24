@@ -48,11 +48,12 @@ const signin = async (userObj: UsersAttributes) => {
     ],
     raw: true,
   });
+
   if (userLogged) {
-    userLogged.role = userLogged["user_roles.role.role_name"];
+    userLogged.role = userLogged["user_role.role.role_name"];
     return _.omit(userLogged, [
-      "user_roles.role.role_id",
-      "user_roles.role.role_name",
+      "user_role.role.role_id",
+      "user_role.role.role_name",
     ]);
   } else {
     return null;
@@ -116,6 +117,21 @@ const userValidation = (params: Partial<UsersAttributes>) => {
         isSuccess: false,
         data: [],
         message: `${CONSTANTS.PLEASE_PROVIDE_VALID} onlineAccess ${CONSTANTS.IS_MANDATORY_FIELD}`,
+      },
+    };
+
+    return validationResponse;
+  } else if (
+    (typeof params.merchant_id !== "number" ||
+      params.merchant_id === undefined) &&
+    params.role !== CONSTANTS.ROLES.SUPERADMIN
+  ) {
+    validationResponse = {
+      isValid: false,
+      message: {
+        isSuccess: false,
+        data: [],
+        message: `${CONSTANTS.PLEASE_PROVIDE_VALID} merchant Id ${CONSTANTS.IS_MANDATORY_FIELD}`,
       },
     };
 
@@ -276,9 +292,9 @@ const listUsers = async (params: { [key: string]: any }) => {
     group: ["user_status"],
   });
   const data = _.map(allUsers?.rows, (user) => {
-    user.role = user["user_roles.role.role_name"];
-    delete user["user_roles.role.role_id"];
-    delete user["user_roles.role.role_name"];
+    user.role = user["user_role.role.role_name"];
+    delete user["user_role.role.role_id"];
+    delete user["user_role.role.role_name"];
     return user;
   });
   const active =
@@ -305,7 +321,8 @@ const getUser = async (
   userId: number,
   status: string[] | string = CONSTANTS.STATUS
 ) => {
-  const { User, Role, UserRole, Client } = Models;
+  const { User, Role, UserRole, Client, Merchant, ChargeStation, Location } =
+    Models;
   let user = await User.findOne({
     where: {
       user_id: userId,
@@ -314,25 +331,41 @@ const getUser = async (
     include: [
       {
         model: UserRole,
-        attributes: [],
+        attributes: ["user_role_id"],
         include: [{ model: Role, attributes: ["role_name"] }],
       },
       {
         model: Client,
         attributes: ["client_id"],
         as: "client",
+        include: [
+          {
+            model: Location,
+            as: "locations",
+            include: [
+              {
+                model: ChargeStation,
+                as: "chargeStations",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        model: Merchant,
+        attributes: ["merchant_id"],
+        as: "merchant",
       },
     ],
-    raw: true,
   });
+  user = user.toJSON();
+
   if (user) {
-    user.role = user["user_roles.role.role_name"];
-    user.client_id = user["client.client_id"];
-    user = _.omit(user, [
-      "user_roles.role.role_id",
-      "user_roles.role.role_name",
-      "client.client_id"
-    ]);
+    user.role = _.get(user, "user_role.role.role_name");
+    user.client_id = _.get(user, "client.client_id") ?? null;
+    user.merchant_id = _.get(user, "merchant.merchant_id") ?? null;
+    user.locations = _.get(user, "client.locations");
+    user = _.omit(user, ["user_role", "merchant", "client"]);
     return user;
   } else {
     return null;

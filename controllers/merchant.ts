@@ -1,35 +1,27 @@
 import _ from "lodash";
-import clientServices from "../services/client";
+import merchantServices from "../services/merchant";
 import CONSTANTS from "../utils/constants";
 import { omitBeforeAddEdit } from "../utils/helpers";
 import { RequestHandler } from "express";
 import sequelize from "../utils/db-connection";
 
-/* Create new client */
-const createClient: RequestHandler = async (req, res, next) => {
+/* Create new merchant */
+const createMerchant: RequestHandler = async (req, res, next) => {
   try {
     let createObj = req.body;
     createObj = omitBeforeAddEdit(createObj);
     // createObj.createdBy = req?.id;
-    let checkClientValidation = await clientServices.clientValidation(
+    let checkMerchantValidation = await merchantServices.merchantValidation(
       createObj
     );
-    if (checkClientValidation && !checkClientValidation.isValid) {
-      res.status(400).json(checkClientValidation.message);
+    if (checkMerchantValidation && !checkMerchantValidation.isValid) {
+      res.status(400).json(checkMerchantValidation.message);
     } else {
-      const client = await clientServices.getClientByUserId(createObj.user_id);  
-      if (client!) {
-        return res.status(400).json({
-          isSuccess: false,
-          data: {},
-          message: CONSTANTS.ALREADY_ASSIGN_CLIENT,
-        });
-      }
-      let addClient = await clientServices.createClient(createObj);
+      let addMerchant = await merchantServices.createMerchant(createObj);
       res.status(201).json({
         isSuccess: true,
-        data: addClient,
-        message: CONSTANTS.CLIENT_CREATED,
+        data: addMerchant,
+        message: CONSTANTS.MERCHANT_CREATED,
       });
     }
     next();
@@ -47,10 +39,10 @@ const createClient: RequestHandler = async (req, res, next) => {
   }
 };
 
-const listClients: RequestHandler = async (req, res, next) => {
+const listMerchants: RequestHandler = async (req, res, next) => {
   try {
     const params = req.query;
-    const { data, count } = await clientServices.getAllClients(params);
+    const { data, count } = await merchantServices.getAllMerchants(params);
     return res.status(200).json({
       isSuccess: true,
       data,
@@ -67,11 +59,11 @@ const listClients: RequestHandler = async (req, res, next) => {
   }
 };
 
-const editClient: RequestHandler = async (req, res, next) => {
+const editMerchant: RequestHandler = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const clientId = req.params.id;
-    if (!clientId) {
+    const merchantId = req.params.id;
+    if (!merchantId) {
       await transaction.rollback();
       return res.status(403).send({
         isSuccess: false,
@@ -82,20 +74,19 @@ const editClient: RequestHandler = async (req, res, next) => {
     let updateObj = req.body;
     updateObj = omitBeforeAddEdit(updateObj);
 
-    let checkClientValidation = await clientServices.clientValidation(
-      updateObj
-    );
-    if (checkClientValidation && !checkClientValidation.isValid) {
+    let checkMerchantValidation =
+      await merchantServices.merchantValidation(updateObj);
+    if (checkMerchantValidation && !checkMerchantValidation.isValid) {
       await transaction.rollback();
-      res.status(400).json(checkClientValidation.message);
+      res.status(400).json(checkMerchantValidation.message);
     } else {
-      let updatedClient = await clientServices.editClient(
+      let updatedMerchant = await merchantServices.editMerchant(
         updateObj,
-        clientId,
+        merchantId,
         transaction
       );
 
-      if (!updatedClient) {
+      if (!updatedMerchant) {
         await transaction.rollback();
         return res.status(400).json({
           isSuccess: false,
@@ -106,7 +97,7 @@ const editClient: RequestHandler = async (req, res, next) => {
       await transaction.commit();
       res.status(201).json({
         isSuccess: true,
-        data: updatedClient,
+        data: updatedMerchant,
         message: CONSTANTS.UPDATED,
       });
     }
@@ -122,18 +113,20 @@ const editClient: RequestHandler = async (req, res, next) => {
   }
 };
 
-const getClient: RequestHandler = async (req, res, next) => {
+const getMerchant: RequestHandler = async (req, res, next) => {
   try {
-    const clientId = req.params.id;
-    if (!clientId) {
+    const merchantId = req.params.id;
+    if (!merchantId) {
       return res.status(403).send({
         isSuccess: false,
         data: {},
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
-    const client = await clientServices.getClient(Number(clientId));
-    if (!client) {
+    const merchant = await merchantServices.getMerchant(
+      merchantId
+    );
+    if (!merchant) {
       return res.status(400).json({
         isSuccess: false,
         data: {},
@@ -142,7 +135,7 @@ const getClient: RequestHandler = async (req, res, next) => {
     } else {
       return res.status(200).json({
         isSuccess: true,
-        data: client,
+        data: merchant,
         message: CONSTANTS.DATA_FETCHED,
       });
     }
@@ -156,22 +149,24 @@ const getClient: RequestHandler = async (req, res, next) => {
   }
 };
 
-/* Soft delete client*/
-const deleteClient: RequestHandler = async (req, res, next) => {
+/* Soft delete merchant*/
+const deleteMerchant: RequestHandler = async (req, res, next) => {
   try {
-    const clientId = req.params.id;
-    if (!clientId) {
+    const merchantId = req.params.id;
+    if (!merchantId) {
       return res.status(403).send({
         isSuccess: false,
         data: {},
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
-    let clientDeleted = await clientServices.deleteClient(clientId);
+    let merchantDeleted = await merchantServices.deleteMerchant(
+      merchantId
+    );
     res.status(200).json({
       isSuccess: true,
       data: {},
-      message: CONSTANTS.CLIENT_DELETED,
+      message: CONSTANTS.MERCHANT_DELETED,
     });
     next();
   } catch (error) {
@@ -185,9 +180,9 @@ const deleteClient: RequestHandler = async (req, res, next) => {
 };
 
 export default {
-  createClient,
-  editClient,
-  listClients,
-  getClient,
-  deleteClient,
+  createMerchant,
+  getMerchant,
+  editMerchant,
+  deleteMerchant,
+  listMerchants,
 };

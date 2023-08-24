@@ -12,13 +12,27 @@ import sequelize from "../utils/db-connection";
 const signup: RequestHandler = async (req, res, next) => {
   try {
     let createObj = req.body;
+    const role = req.query.role;
+    if (!role && req.url.includes("signup")) {
+      return res.status(403).send({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.INVALID_PARAMS,
+      });
+    }
     createObj.role = CONSTANTS.ROLES.CLIENT;
     createObj.cust_admin = "n";
     createObj = omitBeforeAddEdit(createObj, ["user_id"]);
     if (req.url.includes("signup")) {
-      createObj.role = CONSTANTS.ROLES.SUPERADMIN;
-      createObj.cust_admin = "y";
+      if (role === CONSTANTS.ROLES.USER) {
+        createObj.role = CONSTANTS.ROLES.USER;
+        createObj.cust_admin = "n";
+      } else {
+        createObj.role = CONSTANTS.ROLES.SUPERADMIN;
+        createObj.cust_admin = "y";
+      }
     }
+
     let checkUserValidation = await userServices.userValidation(createObj);
     if (checkUserValidation && !checkUserValidation.isValid) {
       res.status(400).json(checkUserValidation.message);
