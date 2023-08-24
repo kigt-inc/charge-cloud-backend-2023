@@ -11,6 +11,7 @@ export default {
   ROLES: {
     CLIENT: "client",
     SUPERADMIN: "superadmin",
+    USER: "user",
   },
   LOGIN_WITH_GOOGLE: "Please login via your Google account",
   LOGIN_WITH_MICROSOFT: "Please login via your Microsoft account",
@@ -41,6 +42,8 @@ export default {
   TICKET_CREATED: "ticket created",
   CHARGE_STATION_CREATED: "charge station created",
   CHARGE_STATION_DELETED: "charge station deleted",
+  MERCHANT_CREATED: "merchant created",
+  MERCHANT_DELETED: "merchant deleted",
   PLEASE_PROVIDE_VALID: "Please provide valid",
   STATUS: ["active", "inactive"],
   USER_CREATED: "User created",
@@ -55,5 +58,8 @@ export default {
   USER_DELETED: "User deleted successfully",
   SUPER_ADMIN_ROLE_REQUIRED: "Super Admin role required!",
   CLIENT_ROLE_REQUIRED: "Client role required!",
+  USER_ROLE_REQUIRED: "User role required!",
   SUPER_ADMIN_OR_CLIENT_ROLE_REQUIRED: "Super Admin or Client role required!",
+  SUPER_ADMIN_OR_USER_ROLE_REQUIRED: "Super Admin or User role required!",
+  SUPER_ADMIN_OR_CLIENT_OR_USER_ROLE_REQUIRED: "Super Admin or Client or User role required!",
 };

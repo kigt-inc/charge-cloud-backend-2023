@@ -13,6 +13,14 @@ const User = sequelize.define<UsersModel>(
       autoIncrement: true,
       allowNull: false,
     },
+    merchant_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: {
+        model: "merchants",
+        key: "merchant_id",
+      },
+    },
     user_status: {
       type: Sequelize.STRING(9),
       allowNull: false,

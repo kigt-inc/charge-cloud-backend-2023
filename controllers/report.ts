@@ -26,6 +26,8 @@ const energyUtilizationReport: RequestHandler = async (req, res, next) => {
     const data = await reportServices.energyUtilizationReport(
       params,
       year,
+      req?.role,
+      req?.id,
       chargesType
     );
     res.status(200).json({
@@ -59,8 +61,13 @@ const generatedRevenueReport: RequestHandler = async (req, res, next) => {
 
       year = moment(params.to).diff(moment(params.from), "years", true);
     }
-
-    const data = await reportServices.generatedRevenueReport(params, year);
+    
+    const data = await reportServices.generatedRevenueReport(
+      params,
+      req?.role,
+      req?.id,
+      year
+    );
     res.status(200).json({
       isSuccess: true,
       data: data,

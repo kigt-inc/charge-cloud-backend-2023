@@ -11,7 +11,7 @@ export const relations = {
       sourceKey: "role_id",
     });
 
-    Models.User.hasMany(Models.UserRole, {
+    Models.User.hasOne(Models.UserRole, {
       foreignKey: "user_id",
     });
 
@@ -32,6 +32,7 @@ export const relations = {
 
     Models.Client.hasMany(Models.Location, {
       foreignKey: "client_id",
+      as: "locations"
     });
 
     Models.Location.belongsTo(Models.Client, {
@@ -47,7 +48,18 @@ export const relations = {
     Models.Client.hasOne(Models.User, {
       foreignKey: "user_id",
       sourceKey: "user_id",
-      as: "user"
+      as: "user",
+    });
+
+    Models.Merchant.hasMany(Models.User, {
+      foreignKey: "merchant_id",
+      as: "users",
+    });
+
+    Models.User.hasOne(Models.Merchant, {
+      foreignKey: "merchant_id",
+      sourceKey: "merchant_id",
+      as: "merchant",
     });
     return Models;
   },

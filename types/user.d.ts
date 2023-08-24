@@ -2,6 +2,7 @@ import { Model } from "sequelize";
 
 export interface UsersAttributes {
   user_id: number;
+  merchant_id: number;
   user_status: string;
   password: string; 
   first_name: string;

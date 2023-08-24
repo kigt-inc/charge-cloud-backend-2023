@@ -80,7 +80,7 @@ const editChargeStation: RequestHandler = async (req, res, next) => {
     let checkChargeStationValidation =
       await chargeStationServices.chargeStationValidation(updateObj);
     if (checkChargeStationValidation && !checkChargeStationValidation.isValid) {
-      transaction.rollback();
+      await transaction.rollback();
       res.status(400).json(checkChargeStationValidation.message);
     } else {
       let updatedChargeStation = await chargeStationServices.editChargeStation(
