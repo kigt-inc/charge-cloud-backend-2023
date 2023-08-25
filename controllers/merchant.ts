@@ -163,12 +163,19 @@ const deleteMerchant: RequestHandler = async (req, res, next) => {
     let merchantDeleted = await merchantServices.deleteMerchant(
       merchantId
     );
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.MERCHANT_DELETED,
-    });
-    next();
+    if (merchantDeleted) {
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.MERCHANT_DELETED,
+      });
+    } else {
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.NOT_FOUND,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       isSuccess: false,

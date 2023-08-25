@@ -176,13 +176,21 @@ const deleteUser: RequestHandler = async (req, res, next) => {
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
+
     let userDeleted = await userServices.deleteUser(Number(userId));
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.USER_DELETED,
-    });
-    next();
+    if (userDeleted) {
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.USER_DELETED,
+      });
+    } else {
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.USER_NOT_FOUND,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       isSuccess: false,

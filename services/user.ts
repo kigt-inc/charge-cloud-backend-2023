@@ -358,9 +358,9 @@ const getUser = async (
       },
     ],
   });
-  user = user.toJSON();
-
+  
   if (user) {
+    user = user.toJSON();
     user.role = _.get(user, "user_role.role.role_name");
     user.client_id = _.get(user, "client.client_id") ?? null;
     user.merchant_id = _.get(user, "merchant.merchant_id") ?? null;

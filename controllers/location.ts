@@ -160,12 +160,19 @@ const deleteLocation: RequestHandler = async (req, res, next) => {
       });
     }
     let locationDeleted = await locationServices.deleteLocation(locationId);
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.LOCATION_DELETED,
-    });
-    next();
+    if (locationDeleted) {
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.LOCATION_DELETED,
+      });
+    } else {
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.NOT_FOUND,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       isSuccess: false,

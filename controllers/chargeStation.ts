@@ -166,12 +166,19 @@ const deleteChargeStation: RequestHandler = async (req, res, next) => {
     let chargeStationDeleted = await chargeStationServices.deleteChargeStation(
       chargeStationId
     );
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.CHARGE_STATION_DELETED,
-    });
-    next();
+    if (chargeStationDeleted) {
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.CHARGE_STATION_DELETED,
+      });
+    } else {
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.NOT_FOUND,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       isSuccess: false,
