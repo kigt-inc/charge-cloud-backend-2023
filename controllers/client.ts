@@ -168,12 +168,19 @@ const deleteClient: RequestHandler = async (req, res, next) => {
       });
     }
     let clientDeleted = await clientServices.deleteClient(clientId);
-    res.status(200).json({
-      isSuccess: true,
-      data: {},
-      message: CONSTANTS.CLIENT_DELETED,
-    });
-    next();
+    if (clientDeleted) {
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.CLIENT_DELETED,
+      });
+    } else {
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.NOT_FOUND,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       isSuccess: false,

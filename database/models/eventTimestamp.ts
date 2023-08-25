@@ -86,6 +86,10 @@ const EventTimestamp = sequelize.define<EventTimestampsModel>(
     charge_station_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
+      references: {
+        model: "charge_stations",
+        key: "charge_station_id",
+      },
     },
   },
   {
