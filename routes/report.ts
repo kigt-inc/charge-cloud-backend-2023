@@ -22,7 +22,7 @@ router.get(
 router.get(
   "/charges-transaction",
   [auth.verifyToken, auth.isSuperAdminOrClient],
-  reportController.energyUtilizationReport
+  reportController.totalChargesReport
 );
 
 export default router;

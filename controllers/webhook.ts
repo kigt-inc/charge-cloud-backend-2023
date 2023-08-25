@@ -62,6 +62,7 @@ const createInsertObj = (
 ) => {
   const insertObj: Partial<EVChargerTimestampsAttributes> = {
     serial_no: data["Serial Number"],
+    unique_id: data["unique_id"],
     evse_last_transaction_payment_id: data["EVSE Last Transaction Payment id"],
     evse_last_transaction_timestamp: data["EVSE Last Transaction Timestamp"],
     evse_last_transaction_amount: data["EVSE Last Transaction Amount"],
@@ -212,7 +213,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     }
 
     const evChargerTimestamp =
-      await evChargerTimestampsServices.getEVChargerTimestamp(
+      await evChargerTimestampsServices.getEVChargerTimestampByUniqueId(
         data["unique_id"],
         transaction
       );

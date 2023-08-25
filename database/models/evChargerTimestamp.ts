@@ -24,6 +24,15 @@ const EVChargerTimestamp = sequelize.define<EVChargerTimestampsModel>(
       type: Sequelize.INTEGER,
       allowNull: false,
     },
+    unique_id: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "uniqueId is a mandatory field",
+        },
+      },
+    },
     process_indicator: {
       type: Sequelize.STRING(1),
     },

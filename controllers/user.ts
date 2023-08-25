@@ -128,6 +128,7 @@ const editUser: RequestHandler = async (req, res, next) => {
     ]);
     let checkUserValidation = userServices.userValidation(updateObj);
     if (checkUserValidation && !checkUserValidation.isValid) {
+      await transaction.rollback();
       res.status(400).json(checkUserValidation.message);
     } else {
       const updatedProfile = await userServices.editUser(
