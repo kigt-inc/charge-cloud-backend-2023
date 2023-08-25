@@ -97,6 +97,20 @@ const getEVChargerTimestamp = async (id: string, transaction: Transaction) => {
   return evChargerTimestamp || null;
 };
 
+/* get ev charger timestamp by id */
+const getEVChargerTimestampByUniqueId = async (id: string, transaction: Transaction) => {
+  const { EVChargerTimestamp } = Models;
+  const evChargerTimestamp = await EVChargerTimestamp.findOne({
+    where: {
+      unique_id: id,
+    },
+    raw: true,
+    transaction,
+  });
+
+  return evChargerTimestamp || null;
+};
+
 /* Soft delete ev charger timestamp */
 const deleteEVChargerTimestamp = async (id: string) => {
   const { EVChargerTimestamp } = Models;
@@ -152,4 +166,5 @@ export default {
   deleteEVChargerTimestamp,
   lastEVChargerTimestamp,
   getAllEVChargerTimestampsByTransactionId,
+  getEVChargerTimestampByUniqueId,
 };

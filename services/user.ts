@@ -364,7 +364,7 @@ const getUser = async (
     user.role = _.get(user, "user_role.role.role_name");
     user.client_id = _.get(user, "client.client_id") ?? null;
     user.merchant_id = _.get(user, "merchant.merchant_id") ?? null;
-    user.locations = _.get(user, "client.locations");
+    user.locations = _.get(user, "client.locations") ?? [];
     user = _.omit(user, ["user_role", "merchant", "client"]);
     return user;
   } else {

@@ -4,6 +4,7 @@ export interface EVChargerTimestampsAttributes {
   ev_charger_timestamp_id: number;
   transaction_timestamps_id: number;
   serial_no: number;
+  unique_id: string;
   process_indicator: string;
   status_change_timestamp: Date;
   evse_last_transaction_payment_id: string;
