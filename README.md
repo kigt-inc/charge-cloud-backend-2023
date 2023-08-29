@@ -66,6 +66,12 @@ To run migrations
 npx sequelize-cli db:migrate
 ```
 
+To run seeders
+
+```bash
+npx sequelize-cli db:seed:all
+```
+
 Start the server
 
 ```bash
