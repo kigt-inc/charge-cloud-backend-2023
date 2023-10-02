@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 
 // connect and sync all the db tables with models on initial start.
-sequelize.sync();
+// sequelize.sync();
 sequelize.authenticate();
 
 app.use("/", indexRouter);

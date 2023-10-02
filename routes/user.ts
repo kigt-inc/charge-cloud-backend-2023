@@ -38,13 +38,21 @@ router.get(
   [auth.verifyToken, auth.isSuperAdminOrClientOrUser],
   userController.listUsers
 );
+
+router.patch("/forgotpassword", userController.forgotPassword);
+
+router.patch(
+  "/resetpassword",
+  [auth.verifyResetToken],
+  userController.resetPassword
+);
+
 /* For Change Status active / inactive */
 router.patch(
   "/:id",
   [auth.verifyToken, auth.isSuperAdminOrUser],
   userController.patchUserStatus
 );
-
 /* Restricted Routes Only Admin Can Access */
 
 export default router;

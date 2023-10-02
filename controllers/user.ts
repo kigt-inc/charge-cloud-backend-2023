@@ -7,6 +7,7 @@ import { omitBeforeAddEdit } from "../utils/helpers";
 import { RequestHandler } from "express";
 import { UsersAttributes } from "../types/user";
 import sequelize from "../utils/db-connection";
+import { sendForgotPasswordMail } from "../libs/sendEmail";
 
 /* Register new user */
 const signup: RequestHandler = async (req, res, next) => {
@@ -82,6 +83,8 @@ const signin: RequestHandler = async (req, res, next) => {
       );
       if (!passwordIsValid) {
         return res.status(401).send({
+          isSuccess: false,
+          data: {},
           message: CONSTANTS.INVALID_CREDENTIALS,
         });
       }
@@ -173,6 +176,8 @@ const deleteUser: RequestHandler = async (req, res, next) => {
     const userId = req.params.id;
     if (!userId) {
       return res.status(403).send({
+        isSuccess: false,
+        data: {},
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
@@ -247,6 +252,8 @@ const patchUserStatus: RequestHandler = async (req, res, next) => {
     const userId = req.params.id;
     if (!userId) {
       return res.status(403).send({
+        isSuccess: false,
+        data: {},
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
@@ -273,6 +280,128 @@ const patchUserStatus: RequestHandler = async (req, res, next) => {
   }
 };
 
+const forgotPassword: RequestHandler = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const forgotPasswordBody: { email: string } = req.body;
+    if (!forgotPasswordBody?.email) {
+      await transaction.rollback();
+      return res.status(403).send({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.INVALID_PARAMS,
+      });
+    }
+
+    const user = await userServices.getUserByEmail(forgotPasswordBody?.email);
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.USER_NOT_FOUND,
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user.user_id, role: user.role },
+      process.env.JWT_SECRET_KEY!,
+      {
+        expiresIn: process.env.RESET_TOKEN_EXPIRY,
+      }
+    );
+
+    const resetLink = `RESET LINK:- {{FE_LINK}}?token=${encodeURIComponent(
+      token
+    )}&email=${encodeURIComponent(forgotPasswordBody?.email)}`;
+
+    console.log(resetLink, "link");
+
+    const emailVerification = await sendForgotPasswordMail(
+      forgotPasswordBody?.email,
+      resetLink,
+      process.env.RESET_TOKEN_EXPIRY!
+    );
+
+    if (emailVerification) {
+      await userServices.editUser(
+        { reset_link_token: token },
+        user?.user_id,
+        transaction
+      );
+
+      await transaction.commit();
+      return res.status(200).json({
+        isSuccess: true,
+        data: {},
+        message: CONSTANTS.MAIL_SENT,
+      });
+    } else {
+      await transaction.rollback();
+      res.status(400).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.MAIL_NOT_SENT,
+      });
+    }
+  } catch (error) {
+    await transaction.rollback();
+    res.status(500).json({
+      isSuccess: false,
+      errorLog: error,
+      message: CONSTANTS.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
+const resetPassword: RequestHandler = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const resetPasswordBody: {
+      password: string;
+      confirmPassword: string;
+    } = req.body;
+
+    if (!resetPasswordBody?.password || !resetPasswordBody?.confirmPassword) {
+      await transaction.rollback();
+      return res.status(403).send({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.INVALID_PARAMS,
+      });
+    }
+
+    if (resetPasswordBody?.password !== resetPasswordBody?.confirmPassword) {
+      await transaction.rollback();
+      return res.status(400).send({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.PASSWORD_NOT_MATCH,
+      });
+    }
+
+    await userServices.editUser(
+      { password: resetPasswordBody?.password, reset_link_token: null },
+      String(req?.id),
+      transaction
+    );
+
+    await transaction.commit();
+    return res.status(200).json({
+      isSuccess: true,
+      data: {},
+      message: CONSTANTS.PASSWORD_UPDATED,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    res.status(500).json({
+      isSuccess: false,
+      errorLog: error,
+      message: CONSTANTS.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
 export default {
   signin,
   signup,
@@ -280,4 +409,6 @@ export default {
   deleteUser,
   patchUserStatus,
   listUsers,
+  forgotPassword,
+  resetPassword,
 };
