@@ -3,6 +3,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import CONSTANTS from "../utils/constants";
 import userServices from "../services/user";
 import { TokenPayload } from "../types/token";
+import sequelize from "../utils/db-connection";
 
 /* Middleware to verify User Token */
 const verifyToken: RequestHandler = async (
@@ -184,6 +185,119 @@ const isSuperAdminOrUser: RequestHandler = async (
   }
 };
 
+/* Middleware to verify User Reset Token */
+const verifyResetToken: RequestHandler = async (
+  req,
+  res,
+  next
+): Promise<void | object> => {
+  const transaction = await sequelize.transaction();
+  let user;
+  try {
+    const queryStrings: { token?: string } = req.query;
+    let { token } = queryStrings!;
+    token = decodeURIComponent(token!);
+
+    if (!req.body?.email) {
+      await transaction.rollback();
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.EMAIL_REQUIRED,
+      });
+    }
+
+    const email = req.body.email
+
+    if (!token) {
+      await transaction.rollback();
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.TOKEN_REQUIRED,
+      });
+    }
+
+    user = await userServices.getUserByEmail(email);
+
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.USER_NOT_FOUND,
+      });
+    }
+
+    if (!user?.reset_link_token) {
+      await transaction.rollback();
+      return res.status(400).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.RESET_TOKEN_GENERATE,
+      });
+    }
+
+    if (user?.reset_link_token !== token) {
+      await transaction.rollback();
+      return res.status(400).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.TOKEN_NOT_MATCH,
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET_KEY as Secret
+    ) as TokenPayload;
+
+    if (!decoded) {
+      await transaction.rollback();
+      return res.status(500).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.INTERNAL_SERVER_ERROR,
+      });
+    }
+    req.id = decoded?.id;
+    req.role = decoded.role;
+
+    await transaction.commit();
+    next();
+  } catch (error: any) {
+    console.log(error, "err");
+
+    if (error.message === "invalid token") {
+      await transaction.rollback();
+      return res.status(400).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.INVALID_TOKEN,
+      });
+    } else if (error.message === "jwt expired") {
+      await userServices.editUser(
+        { reset_link_token: null },
+        user?.user_id,
+        transaction
+      );
+      await transaction.commit();
+      return res.status(400).json({
+        isSuccess: false,
+        data: {},
+        message: CONSTANTS.TOKEN_EXPIRED,
+      });
+    }
+
+    await transaction.rollback();
+    res.status(500).json({
+      isSuccess: false,
+      data: {},
+      message: CONSTANTS.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
 const auth = {
   isUser,
   isSuperAdmin,
@@ -192,6 +306,7 @@ const auth = {
   verifyToken,
   isSuperAdminOrClientOrUser,
   isSuperAdminOrUser,
+  verifyResetToken,
 };
 
 export default auth;

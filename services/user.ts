@@ -452,6 +452,36 @@ const patchUserStatus = async (userId: number) => {
   }
 };
 
+/* list users by email*/
+const getUserByEmail = async (
+  email: string,
+  status: string[] | string = CONSTANTS.STATUS
+) => {
+  const { User, Role, UserRole } = Models;
+  let user = await User.findOne({
+    where: {
+      email,
+      user_status: status,
+    },
+    include: [
+      {
+        model: UserRole,
+        attributes: ["user_role_id"],
+        include: [{ model: Role, attributes: ["role_name"] }],
+      },
+    ],
+  });
+
+  if (user) {
+    user = user.toJSON();
+    user.role = _.get(user, "user_role.role.role_name");
+    user = _.omit(user, ["user_role"]);
+    return user;
+  } else {
+    return null;
+  }
+};
+
 export default {
   signin,
   signup,
@@ -462,4 +492,5 @@ export default {
   getUser,
   listUsers,
   userValidation,
+  getUserByEmail,
 };

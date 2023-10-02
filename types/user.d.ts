@@ -10,7 +10,7 @@ export interface UsersAttributes {
   email: string;
   phone_no: string;
   type: string;
-  reset_link_token: string;
+  reset_link_token: string | null;
   exp_date: Date;
   online_access: string;
   cust_admin: string;
