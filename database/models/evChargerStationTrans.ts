@@ -52,7 +52,7 @@ const EVChargeStationTrans = sequelize.define<EVChargeStationTransModel>(
       allowNull: true,
     },
     transaction_stop_reason: {
-      type: Sequelize.STRING(20),
+      type: Sequelize.STRING(100),
       allowNull: true,
       defaultValue: null,
     },

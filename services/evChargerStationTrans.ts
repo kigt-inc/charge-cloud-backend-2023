@@ -25,6 +25,7 @@ const getAllEVChargeStationTrans = async (params: { [key: string]: any }) => {
       params?.sortBy && params?.order
         ? [params.sortBy, params.order]
         : ["createdAt", "DESC"],
+      ["charge_record_id", "DESC"],
     ],
     raw: true,
   });
@@ -99,14 +100,17 @@ const getEVChargeStationTrans = async (id: string) => {
 
 /* get EVChargeStationTrans by id */
 const getAllEVChargeStationTransByTransactionTimestampId = async (
-  id: number,
+  id: number
 ) => {
   const { EVChargeStationTrans } = Models;
   const evChargerStationTrans = await EVChargeStationTrans.findAll({
     where: {
       transaction_timestamp_id: id,
     },
-    order: [["createdAt", "DESC"]],
+    order: [
+      ["createdAt", "DESC"],
+      ["charge_record_id", "DESC"],
+    ],
     raw: true,
   });
 

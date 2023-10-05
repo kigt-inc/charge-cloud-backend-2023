@@ -73,7 +73,7 @@ const EVChargerTimestamp = sequelize.define<EVChargerTimestampsModel>(
       type: Sequelize.STRING,
     },
     evse_max_current: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
     },
     evse_payment_state: {
       type: Sequelize.BOOLEAN,
