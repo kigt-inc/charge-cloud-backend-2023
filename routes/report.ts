@@ -25,4 +25,22 @@ router.get(
   reportController.totalChargesReport
 );
 
+router.get(
+  "/energy-utilization/download",
+  [auth.verifyToken, auth.isSuperAdminOrClient], 
+  reportController.energyUtilizationReportDownload
+);
+/* For get revenue per day report */
+router.get(
+  "/generated-revenue/download",
+  [auth.verifyToken, auth.isSuperAdminOrClient],
+  reportController.generatedRevenueReportDownload
+);
+/* For get charges/transactions vs time */
+router.get(
+  "/charges-transaction/download",
+  [auth.verifyToken, auth.isSuperAdminOrClient],
+  reportController.totalChargesReportDownload
+);
+
 export default router;

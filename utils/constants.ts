@@ -72,4 +72,5 @@ export default {
     "Super Admin or Client or User role required!",
   MAIL_SENT: "Mail sent",
   MAIL_NOT_SENT: "Mail not sent",
+  NO_DATA_FOR_FILE: "No Data to create the file",
 };

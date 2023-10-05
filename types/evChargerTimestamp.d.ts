@@ -16,7 +16,7 @@ export interface EVChargerTimestampsAttributes {
   evse_energy: string;
   evse_connected_to_interface: true | false;
   evse_location: string;
-  evse_max_current: string;
+  evse_max_current: number;
   evse_payment_state: true | false;
   evse_app_ascreen: string;
   evse_status_code_raw: string;

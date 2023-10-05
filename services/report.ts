@@ -5,14 +5,23 @@ import moment from "moment";
 import sequelize from "../utils/db-connection";
 import userServices from "../services/user";
 import CONSTANTS from "../utils/constants";
+import excelJS from "exceljs";
 
 const energyUtilizationReport = async (
   params: { [key: string]: any },
-  year: number | null,
   role: string,
   userId: number
 ) => {
   const { EVChargeStationTrans } = Models;
+  let year: number | null = null;
+  if (params.from && params.to) {
+    params.from = moment(params.from)
+      .startOf("day")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
+    params.to = moment(params.to).endOf("day").format("YYYY-MM-DDTHH:mm:ssZ");
+
+    year = moment(params.to).diff(moment(params.from), "years", true);
+  }
 
   let attributes, group;
   if (year && year > 1) {
@@ -84,10 +93,20 @@ const energyUtilizationReport = async (
 const generatedRevenueReport = async (
   params: { [key: string]: any },
   role: string,
-  userId: number,
-  year: number | null
+  userId: number
 ) => {
   let attributes, group;
+  let year: number | null = null;
+
+  if (params.from && params.to) {
+    params.from = moment(params.from)
+      .startOf("day")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
+    params.to = moment(params.to).endOf("day").format("YYYY-MM-DDTHH:mm:ssZ");
+
+    year = moment(params.to).diff(moment(params.from), "years", true);
+  }
+
   if (year && year > 1) {
     attributes = [
       [sequelize.fn("month", sequelize.col("createdAt")), "month"],
@@ -157,13 +176,22 @@ const generatedRevenueReport = async (
 
 const totalChargesReport = async (
   params: { [key: string]: any },
-  year: number | null,
   role: string,
   userId: number
 ) => {
   const { EVChargeStationTrans } = Models;
-
+  let year: number | null = null;
   let attributes, group;
+
+  if (params.from && params.to) {
+    params.from = moment(params.from)
+      .startOf("day")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
+    params.to = moment(params.to).endOf("day").format("YYYY-MM-DDTHH:mm:ssZ");
+
+    year = moment(params.to).diff(moment(params.from), "years", true);
+  }
+
   if (year && year > 1) {
     attributes = [
       [sequelize.fn("month", sequelize.col("createdAt")), "month"],
@@ -193,15 +221,11 @@ const totalChargesReport = async (
       [Op.not]: null,
     },
   };
-  
-  console.log(role,"role");
-  
+
   if (role === CONSTANTS.ROLES.CLIENT) {
-    const user = await userServices.getUser(userId);   
+    const user = await userServices.getUser(userId);
     let chargeStations: number[];
-    console.log(user.locations,"user.locations");
-    
-    if(user.locations.length > 0) {
+    if (user.locations.length > 0) {
       chargeStations = user.locations.reduce(
         (
           prevChargeStations: number[],
@@ -220,16 +244,14 @@ const totalChargesReport = async (
       };
     }
   }
-  console.log(where,"where");
-  
+
   const data = await EVChargeStationTrans.findAll({
     where,
     attributes,
     group,
     raw: true,
   });
-  console.log(data,"data");
-  
+
   const totalChargeSessionCount: number = data.reduce(
     (sum: number, record: any) => sum + record.chargeSessionCount,
     0
@@ -241,8 +263,34 @@ const totalChargesReport = async (
   };
 };
 
+const reportDownload = async (data: { [key: string]: any }) => {
+  const workbook = new excelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Energy Utilization Report");
+
+  const dataKeys = Object.keys(data);
+  const columnNames = Object.keys(data[dataKeys[0]][0]);
+
+  worksheet.addRow(" ".repeat(2).split(" "));
+  worksheet.addRow([...columnNames]);
+  worksheet.addRow(" ".repeat(2).split(" "));
+
+  data[dataKeys[0]]?.forEach((record: { [key: string]: any }) => {
+    worksheet.addRow([
+      moment(record[columnNames[0]]).format("YYYY-MM-DD HH:mm:ss"),
+      record[columnNames[1]],
+    ]);
+  });
+
+  worksheet.addRow(" ".repeat(2).split(" "));
+  worksheet.addRow([dataKeys[1], data[dataKeys[1]]]);
+
+  const buffer = await workbook.csv.writeBuffer();
+  return buffer;
+};
+
 export default {
   energyUtilizationReport,
   generatedRevenueReport,
   totalChargesReport,
+  reportDownload,
 };

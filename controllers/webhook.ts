@@ -365,6 +365,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         };
         chargeStationObj = {
           charge_station_status: "Occupied",
+          evse_app_screen: "Occupied",
         };
         break;
       case "2":
@@ -399,13 +400,17 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           };
           chargeStationObj = {
             charge_station_status: "“Connected",
+            evse_app_screen: "“Connected",
           };
           const evChargerStationTran =
             await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
               transactionTimestampId!
             );
           if (evChargerStationTran.length > 0) {
-            const energyUsage = (208 * data["EVSE Max Current"]) / 1000;
+            const energyUsage =
+              evChargerStationTran.length === 3
+                ? data["EVSE Max Current"]
+                : (208 * data["EVSE Max Current"]) / 1000;
             const subEventDuration = moment(
               data["status_change_timestamp"]
             ).diff(
@@ -421,9 +426,21 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             };
             await evChargerStationTransServices.editEVChargeStationTrans(
               subTransObj!,
-              evChargerStationTran[0]?.charge_record_id,
+              evChargerStationTran.length === 3
+                ? evChargerStationTran[1]?.charge_record_id
+                : evChargerStationTran[0]?.charge_record_id,
               transaction
             );
+            evChargerStationTran.length === 3 &&
+              (await evChargerStationTransServices.editEVChargeStationTrans(
+                {
+                  event_end: createObj?.status_change_timestamp,
+                  kwh_session: (subEventDuration / 60) * energyUsage,
+                  event_duration: subEventDuration,
+                },
+                evChargerStationTran[0]?.charge_record_id,
+                transaction
+              ));
           }
         } else if (lastTimestampInfo?.evse_status_code === "255") {
           transObj = {
@@ -435,6 +452,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           };
           chargeStationObj = {
             charge_station_status: "Occupied",
+            evse_app_screen: "Occupied",
           };
         } else if (
           errorStatusCodes.includes(lastTimestampInfo?.evse_status_code)
@@ -460,7 +478,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             data["Serial Number"],
             transaction
           );
-
         if (
           lastTimestampInfo?.evse_status_code === "1" ||
           lastTimestampInfo?.evse_status_code === "2"
@@ -474,6 +491,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           };
           chargeStationObj = {
             charge_station_status: "Charging",
+            evse_app_screen: "Charging",
           };
           const subTransObj = {
             ...transObj,
@@ -482,6 +500,12 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           await evChargerStationTransServices.createEVChargeStationTrans(
             subTransObj!
           );
+          if (createObj?.evse_max_current! < 28) {
+            await evChargerStationTransServices.createEVChargeStationTrans({
+              transaction_timestamp_id: transactionTimestampId!,
+              event_start: createObj?.status_change_timestamp,
+            });
+          }
         }
         break;
       case "254":
@@ -497,12 +521,21 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             data["Serial Number"],
             transaction
           );
+        const allTimestampsForOneSession =
+          await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
+            transactionTimestampId!,
+            data["Serial Number"]
+          );
+        const throttledTimestamp = allTimestampsForOneSession.filter(
+          (timeStamp: { evse_max_current: number }) =>
+            timeStamp?.evse_max_current < 28
+        );
+        const energyUsage =
+          throttledTimestamp.length > 0
+            ? data["EVSE Max Current"]
+            : (208 * data["EVSE Max Current"]) / 1000;
+
         if (lastTimestampInfo?.evse_status_code === "2") {
-          const allTimestampsForOneSession =
-            await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
-              transactionTimestampId!,
-              data["Serial Number"]
-            );
           const eventDuration = moment(
             allTimestampsForOneSession[0].status_change_timestamp
           ).diff(
@@ -518,7 +551,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
               (timeStamp: EVChargerTimestampsAttributes) =>
                 timeStamp.evse_status_code === "3"
             ) ?? {};
-          const energyUsage = (208 * data["EVSE Max Current"]) / 1000;
           if (chargingStartTimestamp) {
             transObj = {
               transaction_timestamp_id: transactionTimestampId!,
@@ -550,8 +582,39 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             transaction_stop_reason: "normal",
           };
         }
+
+        if (
+          (createObj?.evse_status_code === "254" &&
+            lastTimestampInfo?.evse_status_code === "3") ||
+          (createObj?.evse_status_code === "255" &&
+            lastTimestampInfo?.evse_status_code === "2" &&
+            lastTimestampInfo?.evse_max_current !== 28)
+        ) {
+          if (
+            throttledTimestamp.length > 0 &&
+            createObj?.evse_max_current === 28
+          ) {
+            const evChargerStationTran =
+              await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
+                transactionTimestampId!
+              );
+            const eventDuration = moment(
+              lastTimestampInfo?.status_change_timestamp
+            ).diff(moment(createObj?.status_change_timestamp), "minutes", true);
+            await evChargerStationTransServices.editEVChargeStationTrans(
+              {
+                event_end: createObj?.status_change_timestamp,
+                kwh_session: (eventDuration / 60) * energyUsage,
+                event_duration: eventDuration,
+              },
+              evChargerStationTran[0]?.charge_record_id,
+              transaction
+            );
+          }
+        }
         chargeStationObj = {
           charge_station_status: "Available",
+          evse_app_screen: "Available",
         };
         break;
     }
