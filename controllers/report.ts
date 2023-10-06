@@ -104,9 +104,9 @@ const energyUtilizationReportDownload: RequestHandler = async (
     );
 
     if (data?.energyUtilizationData.length === 0) {
-      res.status(404).json({
-        isSuccess: true,
-        data: data,
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
         message: CONSTANTS.NO_DATA_FOR_FILE,
       });
     }
@@ -151,9 +151,9 @@ const generatedRevenueReportDownload: RequestHandler = async (
     );
 
     if (data?.generateRevenueData.length === 0) {
-      res.status(404).json({
-        isSuccess: true,
-        data: data,
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
         message: CONSTANTS.NO_DATA_FOR_FILE,
       });
     }
@@ -194,9 +194,9 @@ const totalChargesReportDownload: RequestHandler = async (req, res, next) => {
     );
 
     if (data?.totalChargeSessionData.length === 0) {
-      res.status(404).json({
-        isSuccess: true,
-        data: data,
+      return res.status(404).json({
+        isSuccess: false,
+        data: {},
         message: CONSTANTS.NO_DATA_FOR_FILE,
       });
     }

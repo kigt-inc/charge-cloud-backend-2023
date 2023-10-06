@@ -382,11 +382,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           createObj,
           transaction
         );
-        lastTimestampInfo =
-          await evChargerTimestampsServices.lastEVChargerTimestamp(
-            data["Serial Number"],
-            transaction
-          );
         if (
           lastTimestampInfo?.evse_status_code === "254" ||
           lastTimestampInfo?.evse_status_code === "3"
@@ -473,11 +468,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           createObj,
           transaction
         );
-        lastTimestampInfo =
-          await evChargerTimestampsServices.lastEVChargerTimestamp(
-            data["Serial Number"],
-            transaction
-          );
         if (
           lastTimestampInfo?.evse_status_code === "1" ||
           lastTimestampInfo?.evse_status_code === "2"
@@ -516,11 +506,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           createObj,
           transaction
         );
-        lastTimestampInfo =
-          await evChargerTimestampsServices.lastEVChargerTimestamp(
-            data["Serial Number"],
-            transaction
-          );
         const allTimestampsForOneSession =
           await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
             transactionTimestampId!,

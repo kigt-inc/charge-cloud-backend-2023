@@ -35,7 +35,7 @@ const signup: RequestHandler = async (req, res, next) => {
       }
     }
 
-    let checkUserValidation = await userServices.userValidation(createObj);
+    let checkUserValidation = userServices.userValidation(createObj);
     if (checkUserValidation && !checkUserValidation.isValid) {
       res.status(400).json(checkUserValidation.message);
     } else {
@@ -64,7 +64,7 @@ const signup: RequestHandler = async (req, res, next) => {
 const signin: RequestHandler = async (req, res, next) => {
   try {
     const params = req.body;
-    let checkUserValidation = await userServices.userSignInValidation(params);
+    let checkUserValidation = userServices.userSignInValidation(params);
 
     if (checkUserValidation && !checkUserValidation.isValid) {
       res.status(400).json(checkUserValidation.message);
