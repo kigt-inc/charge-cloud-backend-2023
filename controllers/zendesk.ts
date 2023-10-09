@@ -8,8 +8,7 @@ const createZendeskTicket: RequestHandler = async (req, res, next) => {
   try {
     const ticketObj = req.body;
 
-    let checkZendeskTicketValidation =
-      await zendeskServices.zendeskTicketValidation(ticketObj);
+    let checkZendeskTicketValidation = zendeskServices.zendeskTicketValidation(ticketObj);
 
     if (checkZendeskTicketValidation && !checkZendeskTicketValidation.isValid) {
       res.status(400).json(checkZendeskTicketValidation.message);
