@@ -32,10 +32,13 @@ const energyUtilizationReport = async (
     group = [sequelize.fn("month", sequelize.col("createdAt"))];
   } else {
     attributes = [
-      "createdAt",
+      [
+        sequelize.fn("DATE_FORMAT", sequelize.col("createdAt"), "%Y-%m-%d"),
+        "day",
+      ],
       [sequelize.literal("ROUND(SUM(kwh_session), 2)"), "totalKwhSession"],
     ];
-    group = ["createdAt"];
+    group = ["day"];
   }
 
   let where: { [key: string]: any } = {
@@ -115,10 +118,13 @@ const generatedRevenueReport = async (
     group = [sequelize.fn("month", sequelize.col("createdAt"))];
   } else {
     attributes = [
-      "createdAt",
+      [
+        sequelize.fn("DATE_FORMAT", sequelize.col("createdAt"), "%Y-%m-%d"),
+        "day",
+      ],
       [sequelize.literal("ROUND(SUM(total_cost), 2)"), "totalCost"],
     ];
-    group = ["createdAt"];
+    group = ["day"];
   }
 
   let where: { [key: string]: any } = {
@@ -200,10 +206,13 @@ const totalChargesReport = async (
     group = [sequelize.fn("month", sequelize.col("createdAt"))];
   } else {
     attributes = [
-      "createdAt",
+      [
+        sequelize.fn("DATE_FORMAT", sequelize.col("createdAt"), "%Y-%m-%d"),
+        "day",
+      ],
       [sequelize.literal("COUNT(*)"), "chargeSessionCount"],
     ];
-    group = ["createdAt"];
+    group = ["day"];
   }
 
   let where: { [key: string]: any } = {
@@ -275,10 +284,7 @@ const reportDownload = async (data: { [key: string]: any }) => {
   worksheet.addRow(" ".repeat(2).split(" "));
 
   data[dataKeys[0]]?.forEach((record: { [key: string]: any }) => {
-    worksheet.addRow([
-      moment(record[columnNames[0]]).format("YYYY-MM-DD HH:mm:ss"),
-      record[columnNames[1]],
-    ]);
+    worksheet.addRow([record[columnNames[0]], record[columnNames[1]]]);
   });
 
   worksheet.addRow(" ".repeat(2).split(" "));

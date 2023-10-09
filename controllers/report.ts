@@ -20,6 +20,7 @@ const energyUtilizationReport: RequestHandler = async (req, res, next) => {
       message: CONSTANTS.DATA_FETCHED,
     });
   } catch (error: any) {
+    console.log(error,"err");
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -49,7 +50,6 @@ const generatedRevenueReport: RequestHandler = async (req, res, next) => {
     });
   } catch (error: any) {
     console.log(error, "error");
-
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -78,6 +78,7 @@ const totalChargesReport: RequestHandler = async (req, res, next) => {
       message: CONSTANTS.DATA_FETCHED,
     });
   } catch (error: any) {
+    console.log(error, "err");
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
