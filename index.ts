@@ -6,6 +6,7 @@ import "dotenv/config";
 import sequelize from "./utils/db-connection";
 import indexRouter from "./routes/index";
 import moment from "moment-timezone";
+import morgan from "morgan";
 import connectionLogServices from "./services/connectionLog";
 import { initIO } from "./utils/socket";
 import { ConnectionLogsAttributes } from "./types/connectionLog";
@@ -24,6 +25,7 @@ io.on("connection", (socket: any) => {
   });
 });
 
+app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
