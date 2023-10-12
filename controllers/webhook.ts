@@ -403,7 +403,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             );
           if (evChargerStationTran.length > 0) {
             const energyUsage =
-              evChargerStationTran.length === 3
+              evChargerStationTran.length === 4
                 ? data["EVSE Max Current"]
                 : (208 * data["EVSE Max Current"]) / 1000;
             const subEventDuration = moment(
@@ -421,12 +421,12 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             };
             await evChargerStationTransServices.editEVChargeStationTrans(
               subTransObj!,
-              evChargerStationTran.length === 3
+              evChargerStationTran.length === 4
                 ? evChargerStationTran[1]?.charge_record_id
                 : evChargerStationTran[0]?.charge_record_id,
               transaction
             );
-            evChargerStationTran.length === 3 &&
+            evChargerStationTran.length === 4 &&
               (await evChargerStationTransServices.editEVChargeStationTrans(
                 {
                   event_end: createObj?.status_change_timestamp,
@@ -483,6 +483,30 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             charge_station_status: "Charging",
             evse_app_screen: "Charging",
           };
+
+          const allTimestampsForOneSession =
+            await evChargerTimestampsServices.getAllEVChargerTimestampsByTransactionId(
+              transactionTimestampId!,
+              data["Serial Number"]
+            );
+
+          await evChargerStationTransServices.createEVChargeStationTrans({
+            transaction_timestamp_id: transactionTimestampId!,
+            event_start:
+              allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
+                .status_change_timestamp,
+            event_end: data["status_change_timestamp"],
+            event_duration: moment(data["status_change_timestamp"]).diff(
+              moment(
+                allTimestampsForOneSession[
+                  allTimestampsForOneSession.length - 1
+                ].status_change_timestamp
+              ),
+              "minutes",
+              true
+            ),
+          });
+
           const subTransObj = {
             ...transObj,
             event_start: data["status_change_timestamp"],
