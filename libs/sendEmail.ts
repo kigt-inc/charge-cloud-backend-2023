@@ -57,7 +57,7 @@ export const sendForgotPasswordMail = async (
     to: email,
     subject: "Forgot Password",
     html: template({ reset_link_token, linkExpiry }),
-    // text: " Verify Email, A request to create your node-typescript-boilerplate account was received.Use this OTP to confirm your account and log in",
+    text: "Forgot Password, A request to change your password was received.Use this reset link to change your password and log in",
   });
 
   return emailSended;

@@ -40,7 +40,7 @@ const createEVChargerTimestamp = async (
   const { EVChargerTimestamp } = Models;
   let evChargerTimestampCreated = await EVChargerTimestamp.create(
     timestampObj,
-    transaction
+    { transaction }
   );
   if (evChargerTimestampCreated) {
     evChargerTimestampCreated = evChargerTimestampCreated?.toJSON();
