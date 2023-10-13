@@ -1,6 +1,7 @@
 import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { LocationsModel } from "../../types/location";
+import ChargeStation from "./chargeStation";
 
 const Location = sequelize.define<LocationsModel>(
   "locations",
@@ -111,6 +112,17 @@ const Location = sequelize.define<LocationsModel>(
     tableName: "locations",
     paranoid: true,
     timestamps: true,
+    hooks: {
+      afterDestroy: async function (chargeStation, fn) {
+        await ChargeStation.destroy({
+          where: {
+            [Sequelize.Op.or]: [{ location_id: chargeStation.location_id }],
+          },
+          individualHooks: true,
+          transaction: fn.transaction,
+        });
+      },
+    },
   }
 );
 

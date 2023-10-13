@@ -1,8 +1,9 @@
 import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { UsersModel } from "../../types/user";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import moment from "moment";
+import Client from "./client";
 
 const User = sequelize.define<UsersModel>(
   "users",
@@ -110,6 +111,15 @@ const User = sequelize.define<UsersModel>(
             transaction: fn.transaction,
           }
         );
+      },
+      afterDestroy: async function (user, fn) {
+        await Client.destroy({
+          where: {
+            [Sequelize.Op.or]: [{ user_id: user.user_id }],
+          },
+          individualHooks: true,
+          transaction: fn.transaction,
+        });
       },
     },
   }
