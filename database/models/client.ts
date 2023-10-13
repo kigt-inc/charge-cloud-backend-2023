@@ -1,6 +1,7 @@
 import sequelize from "../../utils/db-connection";
 import Sequelize from "sequelize";
 import { ClientsModel } from "../../types/client";
+import Location from "./location";
 
 const Client = sequelize.define<ClientsModel>(
   "clients",
@@ -105,6 +106,17 @@ const Client = sequelize.define<ClientsModel>(
     tableName: "clients",
     paranoid: true,
     timestamps: true,
+    hooks: {
+      afterDestroy: async function (client, fn) {
+        await Location.destroy({
+          where: {
+            [Sequelize.Op.or]: [{ client_id: client.client_id }],
+          },
+          individualHooks: true,
+          transaction: fn.transaction,
+        });
+      },
+    },
   }
 );
 
