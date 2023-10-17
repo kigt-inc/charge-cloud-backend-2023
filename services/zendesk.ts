@@ -66,7 +66,7 @@ const getZendeskTicketsByUser = async (userId: number) => {
     raw: true,
   });
 
-  if (ids.length > 1) {
+  if (ids?.length > 0) {
     ids = ids
       ?.reduce(
         (accValue: number[], id: { ticket_id: number }) => [
@@ -80,9 +80,6 @@ const getZendeskTicketsByUser = async (userId: number) => {
     const config = {
       method: "GET",
       url: `${process.env.ZENDESK_REMOTE_URL}/tickets/show_many?ids=${ids}`,
-      params: {
-        query: `requester:darshan.p@crestinfosystems.com`,
-      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${base64PasswordString}`, // Base64 encoded "username:password"
