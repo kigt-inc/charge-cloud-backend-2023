@@ -135,7 +135,10 @@ const errCaseHandle: errCaseFunction = async ({
   let transactionTimestampId, createObj, result, transObj, chargeStationObj;
 
   await zendeskTicketCreation(html_body, priority);
-  if (lastTimestampInfo?.transaction_timestamps_id! !== undefined) {
+  if (
+    lastTimestampInfo?.transaction_timestamps_id! !== undefined &&
+    lastTimestampInfo?.evse_status_code !== "255"
+  ) {
     transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id!;
   } else {
     const transactionTimestampInfo =
@@ -149,10 +152,18 @@ const errCaseHandle: errCaseFunction = async ({
     createObj,
     transaction
   );
-  transObj = {
-    transaction_timestamp_id: transactionTimestampId!,
-    transaction_stop_reason: reason,
-  };
+  if (lastTimestampInfo?.evse_status_code === "255") {
+    transObj = {
+      transaction_timestamp_id: transactionTimestampId!,
+      transaction_stop_reason: reason,
+      event_start: createObj?.status_change_timestamp,
+    };
+  } else {
+    transObj = {
+      transaction_timestamp_id: transactionTimestampId!,
+      transaction_stop_reason: reason,
+    };
+  }
   chargeStationObj = null;
 
   return {
@@ -349,12 +360,16 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         });
         break;
       case "1":
-        const transactionTimestampInfo =
-          await transactionTimestampServices.createTransactionTimestamp(
-            transaction
-          );
-        transactionTimestampId =
-          transactionTimestampInfo?.transaction_timestamp_id;
+        if (lastTimestampInfo?.evse_status_code === "255") {
+          const transactionTimestampInfo =
+            await transactionTimestampServices.createTransactionTimestamp(
+              transaction
+            );
+          transactionTimestampId =
+            transactionTimestampInfo?.transaction_timestamp_id;
+        } else {
+          transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
+        }
         createObj = createInsertObj(data, transactionTimestampId!);
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
@@ -460,6 +475,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         ) {
           transObj = {
             transaction_stop_reason: "normal",
+            transaction_status: "Occupied",
+            connector_status: "Occupied",
           };
           chargeStationObj = null;
         } else {
