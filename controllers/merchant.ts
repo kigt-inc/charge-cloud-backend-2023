@@ -7,6 +7,7 @@ import sequelize from "../utils/db-connection";
 
 /* Create new merchant */
 const createMerchant: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     let createObj = req.body;
     createObj = omitBeforeAddEdit(createObj);
@@ -15,9 +16,11 @@ const createMerchant: RequestHandler = async (req, res, next) => {
       createObj
     );
     if (checkMerchantValidation && !checkMerchantValidation.isValid) {
+      await t.rollback();
       res.status(400).json(checkMerchantValidation.message);
     } else {
-      let addMerchant = await merchantServices.createMerchant(createObj);
+      let addMerchant = await merchantServices.createMerchant(createObj,t);
+      await t.commit();
       res.status(201).json({
         isSuccess: true,
         data: addMerchant,
@@ -26,6 +29,7 @@ const createMerchant: RequestHandler = async (req, res, next) => {
     }
     next();
   } catch (error: any) {
+    await t.rollback();
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -151,9 +155,11 @@ const getMerchant: RequestHandler = async (req, res, next) => {
 
 /* Soft delete merchant*/
 const deleteMerchant: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const merchantId = req.params.id;
     if (!merchantId) {
+      await t.rollback();
       return res.status(403).send({
         isSuccess: false,
         data: {},
@@ -161,15 +167,17 @@ const deleteMerchant: RequestHandler = async (req, res, next) => {
       });
     }
     let merchantDeleted = await merchantServices.deleteMerchant(
-      merchantId
+      merchantId,t
     );
     if (merchantDeleted) {
+      await t.commit();
       return res.status(200).json({
         isSuccess: true,
         data: {},
         message: CONSTANTS.MERCHANT_DELETED,
       });
     } else {
+      await t.rollback();
       return res.status(404).json({
         isSuccess: false,
         data: {},
@@ -177,6 +185,7 @@ const deleteMerchant: RequestHandler = async (req, res, next) => {
       });
     }
   } catch (error) {
+    await t.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,

@@ -6,7 +6,7 @@ import Sequelize, { Transaction } from "sequelize";
 import { UsersAttributes } from "../types/user";
 
 /* Create new user */
-const signup = async (userObj: UsersAttributes) => {
+const signup = async (userObj: UsersAttributes, t: Transaction) => {
   const { User, Role, UserRole } = Models;
   const roleObj = await Role.findOne({
     where: {
@@ -15,13 +15,13 @@ const signup = async (userObj: UsersAttributes) => {
     raw: true,
   });
 
-  let userCreated = await User.create(userObj);
+  let userCreated = await User.create(userObj, { transaction: t });
 
   const userRoleObj = {
     user_id: userCreated.user_id,
     role_id: roleObj.role_id,
   };
-  let userRoleCreated = await UserRole.create(userRoleObj);
+  let userRoleCreated = await UserRole.create(userRoleObj, { transaction: t });
   if (userCreated && userRoleCreated) {
     userCreated = userCreated?.toJSON();
     userCreated.role = userObj.role;
@@ -171,14 +171,17 @@ const userValidation = (params: Partial<UsersAttributes>) => {
 };
 
 /* Soft delete user */
-const deleteUser = async (userId: number) => {
+const deleteUser = async (userId: number, t: Transaction) => {
   const { User } = Models;
-  const userDeleted = await User.destroy({
-    where: {
-      user_id: userId,
+  const userDeleted = await User.destroy(
+    {
+      where: {
+        user_id: userId,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return userDeleted;
 };
 

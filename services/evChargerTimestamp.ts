@@ -112,14 +112,17 @@ const getEVChargerTimestampByUniqueId = async (id: string, transaction: Transact
 };
 
 /* Soft delete ev charger timestamp */
-const deleteEVChargerTimestamp = async (id: string) => {
+const deleteEVChargerTimestamp = async (id: string, t: Transaction) => {
   const { EVChargerTimestamp } = Models;
-  const evChargerTimestampDeleted = await EVChargerTimestamp.destroy({
-    where: {
-      ev_charger_timestamp_id: id,
+  const evChargerTimestampDeleted = await EVChargerTimestamp.destroy(
+    {
+      where: {
+        ev_charger_timestamp_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return evChargerTimestampDeleted;
 };
 

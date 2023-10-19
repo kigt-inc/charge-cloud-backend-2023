@@ -11,6 +11,7 @@ import { sendForgotPasswordMail } from "../libs/sendEmail";
 
 /* Register new user */
 const signup: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     let createObj = req.body;
     const role = req.query.role;
@@ -27,6 +28,7 @@ const signup: RequestHandler = async (req, res, next) => {
         createObj.role = CONSTANTS.ROLES.SUPERADMIN;
         createObj.cust_admin = "y";
       } else {
+        await t.rollback();
         return res.status(403).send({
           isSuccess: false,
           data: {},
@@ -37,9 +39,11 @@ const signup: RequestHandler = async (req, res, next) => {
 
     let checkUserValidation = userServices.userValidation(createObj);
     if (checkUserValidation && !checkUserValidation.isValid) {
+      await t.rollback();
       res.status(400).json(checkUserValidation.message);
     } else {
-      let addUser = await userServices.signup(createObj);
+      let addUser = await userServices.signup(createObj, t);
+      await t.commit();
       res.status(201).json({
         isSuccess: true,
         data: _.omit(addUser, ["password"]),
@@ -48,6 +52,7 @@ const signup: RequestHandler = async (req, res, next) => {
     }
     next();
   } catch (error: any) {
+    await t.rollback();
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -172,9 +177,11 @@ const editUser: RequestHandler = async (req, res, next) => {
 };
 /* For Soft Delete Admin User */
 const deleteUser: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const userId = req.params.id;
     if (!userId) {
+      await t.rollback();
       return res.status(403).send({
         isSuccess: false,
         data: {},
@@ -182,14 +189,16 @@ const deleteUser: RequestHandler = async (req, res, next) => {
       });
     }
 
-    let userDeleted = await userServices.deleteUser(Number(userId));
+    let userDeleted = await userServices.deleteUser(Number(userId), t);
     if (userDeleted) {
+      await t.commit();
       return res.status(200).json({
         isSuccess: true,
         data: {},
         message: CONSTANTS.USER_DELETED,
       });
     } else {
+      await t.rollback();
       return res.status(404).json({
         isSuccess: false,
         data: {},
@@ -197,6 +206,7 @@ const deleteUser: RequestHandler = async (req, res, next) => {
       });
     }
   } catch (error) {
+    await t.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,

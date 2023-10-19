@@ -38,11 +38,13 @@ const getAllEVChargeStationTrans = async (params: { [key: string]: any }) => {
 
 /* Create new EVChargeStationTrans*/
 const createEVChargeStationTrans = async (
-  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>
+  evChargerStationTransObj: Partial<EVChargeStationTransAttributes>,
+  t: Transaction
 ) => {
   const { EVChargeStationTrans } = Models;
   let evChargerStationTransCreated = await EVChargeStationTrans.create(
-    evChargerStationTransObj
+    evChargerStationTransObj,
+    { transaction: t }
   );
   if (evChargerStationTransCreated) {
     evChargerStationTransCreated = evChargerStationTransCreated?.toJSON();
@@ -118,14 +120,17 @@ const getAllEVChargeStationTransByTransactionTimestampId = async (
 };
 
 /* Soft delete EVChargeStationTrans */
-const deleteEVChargeStationTrans = async (id: string) => {
+const deleteEVChargeStationTrans = async (id: string, t: Transaction) => {
   const { EVChargeStationTrans } = Models;
-  const evChargerStationTransDeleted = await EVChargeStationTrans.destroy({
-    where: {
-      charge_record_id: id,
+  const evChargerStationTransDeleted = await EVChargeStationTrans.destroy(
+    {
+      where: {
+        charge_record_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return evChargerStationTransDeleted;
 };
 

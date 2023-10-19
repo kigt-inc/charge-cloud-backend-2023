@@ -33,9 +33,12 @@ const getAllCustomers = async (params: { [key: string]: any }) => {
 };
 
 /* Create new customer*/
-const createCustomer = async (customerObj: CustomersAttributes) => {
+const createCustomer = async (
+  customerObj: CustomersAttributes,
+  t: Transaction
+) => {
   const { Customer } = Models;
-  let customerCreated = await Customer.create(customerObj);
+  let customerCreated = await Customer.create(customerObj, { transaction: t });
   if (customerCreated) {
     customerCreated = customerCreated?.toJSON();
     return customerCreated;
@@ -88,14 +91,17 @@ const getCustomer = async (id: string) => {
 };
 
 /* Soft delete customer */
-const deleteCustomer = async (id: string) => {
+const deleteCustomer = async (id: string, t: Transaction) => {
   const { Customer } = Models;
-  const customerDeleted = await Customer.destroy({
-    where: {
-      customer_id: id,
+  const customerDeleted = await Customer.destroy(
+    {
+      where: {
+        customer_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return customerDeleted;
 };
 

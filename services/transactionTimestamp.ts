@@ -36,9 +36,12 @@ const getAllTransactionTimestamps = async (params: { [key: string]: any }) => {
 };
 
 /* Create new TransactionTimestamp*/
-const createTransactionTimestamp = async () => {
+const createTransactionTimestamp = async (t: Transaction) => {
   const { TransactionTimestamp } = Models;
-  let transactionTimestampCreated = await TransactionTimestamp.create();
+  let transactionTimestampCreated = await TransactionTimestamp.create(
+    {},
+    { transaction: t }
+  );
   if (transactionTimestampCreated) {
     transactionTimestampCreated = transactionTimestampCreated?.toJSON();
     return transactionTimestampCreated;
@@ -94,14 +97,17 @@ const getTransactionTimestamp = async (id: string) => {
 };
 
 /* Soft delete TransactionTimestamp */
-const deleteTransactionTimestamp = async (id: string) => {
+const deleteTransactionTimestamp = async (id: string, t: Transaction) => {
   const { TransactionTimestamp } = Models;
-  const transactionTimestampDeleted = await TransactionTimestamp.destroy({
-    where: {
-      transaction_timestamp_id: id,
+  const transactionTimestampDeleted = await TransactionTimestamp.destroy(
+    {
+      where: {
+        transaction_timestamp_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return transactionTimestampDeleted;
 };
 

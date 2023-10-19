@@ -7,6 +7,7 @@ import sequelize from "../utils/db-connection";
 
 /* Create new charge station */
 const createChargeStation: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     let createObj = req.body;
     createObj = omitBeforeAddEdit(createObj);
@@ -14,11 +15,14 @@ const createChargeStation: RequestHandler = async (req, res, next) => {
     let checkChargeStationValidation =
       await chargeStationServices.chargeStationValidation(createObj);
     if (checkChargeStationValidation && !checkChargeStationValidation.isValid) {
+      await t.rollback();
       res.status(400).json(checkChargeStationValidation.message);
     } else {
       let addChargeStation = await chargeStationServices.createChargeStation(
-        createObj
+        createObj,
+        t
       );
+      await t.commit();
       res.status(201).json({
         isSuccess: true,
         data: addChargeStation,
@@ -27,6 +31,7 @@ const createChargeStation: RequestHandler = async (req, res, next) => {
     }
     next();
   } catch (error: any) {
+    await t.rollback();
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -154,9 +159,11 @@ const getChargeStation: RequestHandler = async (req, res, next) => {
 
 /* Soft delete charge station*/
 const deleteChargeStation: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const chargeStationId = req.params.id;
     if (!chargeStationId) {
+      await t.rollback();
       return res.status(403).send({
         isSuccess: false,
         data: {},
@@ -164,15 +171,18 @@ const deleteChargeStation: RequestHandler = async (req, res, next) => {
       });
     }
     let chargeStationDeleted = await chargeStationServices.deleteChargeStation(
-      chargeStationId
+      chargeStationId,
+      t
     );
     if (chargeStationDeleted) {
+      await t.commit();
       return res.status(200).json({
         isSuccess: true,
         data: {},
         message: CONSTANTS.CHARGE_STATION_DELETED,
       });
     } else {
+      await t.rollback();
       return res.status(404).json({
         isSuccess: false,
         data: {},
@@ -180,6 +190,7 @@ const deleteChargeStation: RequestHandler = async (req, res, next) => {
       });
     }
   } catch (error) {
+    await t.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,

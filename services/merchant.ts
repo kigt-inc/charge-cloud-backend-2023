@@ -41,9 +41,12 @@ const getAllMerchants = async (params: { [key: string]: any }) => {
 };
 
 /* Create new merchant*/
-const createMerchant = async (merchantObj: MerchantsAttributes) => {
+const createMerchant = async (
+  merchantObj: MerchantsAttributes,
+  t: Transaction
+) => {
   const { Merchant } = Models;
-  let merchantCreated = await Merchant.create(merchantObj);
+  let merchantCreated = await Merchant.create(merchantObj, { transaction: t });
   if (merchantCreated) {
     merchantCreated = merchantCreated?.toJSON();
     return merchantCreated;
@@ -102,14 +105,17 @@ const getMerchant = async (id: string) => {
 };
 
 /* Soft delete merchant */
-const deleteMerchant = async (id: string) => {
+const deleteMerchant = async (id: string, t: Transaction) => {
   const { Merchant } = Models;
-  const merchantDeleted = await Merchant.destroy({
-    where: {
-      merchant_id: id,
+  const merchantDeleted = await Merchant.destroy(
+    {
+      where: {
+        merchant_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return merchantDeleted;
 };
 
