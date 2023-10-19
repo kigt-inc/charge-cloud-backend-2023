@@ -58,9 +58,12 @@ const getAllLocations = async (
 };
 
 /* Create new location*/
-const createLocation = async (locationObj: LocationsAttributes) => {
+const createLocation = async (
+  locationObj: LocationsAttributes,
+  t: Transaction
+) => {
   const { Location } = Models;
-  let locationCreated = await Location.create(locationObj);
+  let locationCreated = await Location.create(locationObj, { transaction: t });
   if (locationCreated) {
     locationCreated = locationCreated?.toJSON();
     return locationCreated;
@@ -118,14 +121,17 @@ const getLocation = async (id: string) => {
 };
 
 /* Soft delete location */
-const deleteLocation = async (id: string) => {
+const deleteLocation = async (id: string, t: Transaction) => {
   const { Location } = Models;
-  const locationDeleted = await Location.destroy({
-    where: {
-      location_id: id,
+  const locationDeleted = await Location.destroy(
+    {
+      where: {
+        location_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return locationDeleted;
 };
 

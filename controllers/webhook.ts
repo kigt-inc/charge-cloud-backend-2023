@@ -139,7 +139,9 @@ const errCaseHandle: errCaseFunction = async ({
     transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id!;
   } else {
     const transactionTimestampInfo =
-      await transactionTimestampServices.createTransactionTimestamp();
+      await transactionTimestampServices.createTransactionTimestamp(
+        transaction
+      );
     transactionTimestampId = transactionTimestampInfo?.transaction_timestamp_id;
   }
   createObj = createInsertObj(data, transactionTimestampId);
@@ -348,7 +350,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         break;
       case "1":
         const transactionTimestampInfo =
-          await transactionTimestampServices.createTransactionTimestamp();
+          await transactionTimestampServices.createTransactionTimestamp(
+            transaction
+          );
         transactionTimestampId =
           transactionTimestampInfo?.transaction_timestamp_id;
         createObj = createInsertObj(data, transactionTimestampId!);
@@ -371,7 +375,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
       case "2":
         if (lastTimestampInfo?.evse_status_code === "255") {
           const transactionTimestampInfo =
-            await transactionTimestampServices.createTransactionTimestamp();
+            await transactionTimestampServices.createTransactionTimestamp(
+              transaction
+            );
           transactionTimestampId =
             transactionTimestampInfo?.transaction_timestamp_id;
         } else {
@@ -394,8 +400,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             transaction_stop_reason: "normal",
           };
           chargeStationObj = {
-            charge_station_status: "“Connected",
-            evse_app_screen: "“Connected",
+            charge_station_status: "Connected",
+            evse_app_screen: "Connected",
           };
           const evChargerStationTran =
             await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
@@ -490,35 +496,43 @@ const createWebHook: RequestHandler = async (req, res, next) => {
               data["Serial Number"]
             );
 
-          await evChargerStationTransServices.createEVChargeStationTrans({
-            transaction_timestamp_id: transactionTimestampId!,
-            event_start:
-              allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
-                .status_change_timestamp,
-            event_end: data["status_change_timestamp"],
-            event_duration: moment(data["status_change_timestamp"]).diff(
-              moment(
+          await evChargerStationTransServices.createEVChargeStationTrans(
+            {
+              transaction_timestamp_id: transactionTimestampId!,
+              event_start:
                 allTimestampsForOneSession[
                   allTimestampsForOneSession.length - 1
-                ].status_change_timestamp
+                ].status_change_timestamp,
+              event_end: data["status_change_timestamp"],
+              event_duration: moment(data["status_change_timestamp"]).diff(
+                moment(
+                  allTimestampsForOneSession[
+                    allTimestampsForOneSession.length - 1
+                  ].status_change_timestamp
+                ),
+                "minutes",
+                true
               ),
-              "minutes",
-              true
-            ),
-          });
+            },
+            transaction
+          );
 
           const subTransObj = {
             ...transObj,
             event_start: data["status_change_timestamp"],
           };
           await evChargerStationTransServices.createEVChargeStationTrans(
-            subTransObj!
+            subTransObj!,
+            transaction
           );
           if (createObj?.evse_max_current! < 28) {
-            await evChargerStationTransServices.createEVChargeStationTrans({
-              transaction_timestamp_id: transactionTimestampId!,
-              event_start: createObj?.status_change_timestamp,
-            });
+            await evChargerStationTransServices.createEVChargeStationTrans(
+              {
+                transaction_timestamp_id: transactionTimestampId!,
+                event_start: createObj?.status_change_timestamp,
+              },
+              transaction
+            );
           }
         }
         break;
@@ -649,7 +663,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         );
       } else {
         await evChargerStationTransServices.createEVChargeStationTrans(
-          transObj!
+          transObj!,
+          transaction
         );
       }
 

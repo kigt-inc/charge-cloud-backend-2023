@@ -34,9 +34,9 @@ const getAllClients = async (params: { [key: string]: any }) => {
 };
 
 /* Create new Client*/
-const createClient = async (clientObj: ClientsAttributes) => {
+const createClient = async (clientObj: ClientsAttributes, t: Transaction) => {
   const { Client } = Models;
-  let clientCreated = await Client.create(clientObj);
+  let clientCreated = await Client.create(clientObj, { transaction: t });
   if (clientCreated) {
     clientCreated = clientCreated?.toJSON();
     return clientCreated;
@@ -112,14 +112,17 @@ const getClient = async (id: number) => {
 };
 
 /* Soft delete Client */
-const deleteClient = async (id: string) => {
+const deleteClient = async (id: string, t: Transaction) => {
   const { Client } = Models;
-  const clientDeleted = await Client.destroy({
-    where: {
-      client_id: id,
+  const clientDeleted = await Client.destroy(
+    {
+      where: {
+        client_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return clientDeleted;
 };
 

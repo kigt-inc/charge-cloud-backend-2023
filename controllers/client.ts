@@ -7,6 +7,7 @@ import sequelize from "../utils/db-connection";
 
 /* Create new client */
 const createClient: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     let createObj = req.body;
     createObj = omitBeforeAddEdit(createObj);
@@ -15,17 +16,20 @@ const createClient: RequestHandler = async (req, res, next) => {
       createObj
     );
     if (checkClientValidation && !checkClientValidation.isValid) {
+      await t.rollback();
       res.status(400).json(checkClientValidation.message);
     } else {
       const client = await clientServices.getClientByUserId(createObj.user_id);  
       if (client!) {
+        await t.rollback();
         return res.status(400).json({
           isSuccess: false,
           data: {},
           message: CONSTANTS.ALREADY_ASSIGN_CLIENT,
         });
       }
-      let addClient = await clientServices.createClient(createObj);
+      let addClient = await clientServices.createClient(createObj, t);
+      await t.commit();
       res.status(201).json({
         isSuccess: true,
         data: addClient,
@@ -34,6 +38,7 @@ const createClient: RequestHandler = async (req, res, next) => {
     }
     next();
   } catch (error: any) {
+    await t.rollback();
     let errorMessage;
     if (error?.name == "SequelizeUniqueConstraintError") {
       errorMessage = error?.errors[0]?.message;
@@ -158,23 +163,27 @@ const getClient: RequestHandler = async (req, res, next) => {
 
 /* Soft delete client*/
 const deleteClient: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const clientId = req.params.id;
     if (!clientId) {
+      await t.rollback();
       return res.status(403).send({
         isSuccess: false,
         data: {},
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
-    let clientDeleted = await clientServices.deleteClient(clientId);
+    let clientDeleted = await clientServices.deleteClient(clientId, t);
     if (clientDeleted) {
+      await t.commit();
       return res.status(200).json({
         isSuccess: true,
         data: {},
         message: CONSTANTS.CLIENT_DELETED,
       });
     } else {
+      await t.rollback();
       return res.status(404).json({
         isSuccess: false,
         data: {},
@@ -182,6 +191,7 @@ const deleteClient: RequestHandler = async (req, res, next) => {
       });
     }
   } catch (error) {
+    await t.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,

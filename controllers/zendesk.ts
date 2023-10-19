@@ -2,21 +2,27 @@ import _ from "lodash";
 import CONSTANTS from "../utils/constants";
 import { RequestHandler } from "express";
 import zendeskServices from "../services/zendesk";
+import sequelize from "../utils/db-connection";
 
 /* For Create the zendesk ticket */
 const createZendeskTicket: RequestHandler = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const ticketObj = req.body;
 
-    let checkZendeskTicketValidation = zendeskServices.zendeskTicketValidation(ticketObj);
+    let checkZendeskTicketValidation =
+      zendeskServices.zendeskTicketValidation(ticketObj);
 
     if (checkZendeskTicketValidation && !checkZendeskTicketValidation.isValid) {
+      await t.rollback();
       res.status(400).json(checkZendeskTicketValidation.message);
     } else {
       const addZendeskTicket = await zendeskServices.createZendeskTicket(
         ticketObj,
-        req?.id
+        req?.id,
+        t
       );
+      await t.commit();
       res.status(201).json({
         isSuccess: true,
         data: addZendeskTicket!.data,
@@ -24,6 +30,7 @@ const createZendeskTicket: RequestHandler = async (req, res, next) => {
       });
     }
   } catch (error) {
+    await t.rollback();
     res.status(500).json({
       isSuccess: false,
       errorLog: error,

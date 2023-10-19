@@ -35,10 +35,13 @@ const getAllChargeStations = async (params: { [key: string]: any }) => {
 
 /* Create new charge station*/
 const createChargeStation = async (
-  chargeStationObj: ChargeStationsAttributes
+  chargeStationObj: ChargeStationsAttributes,
+  t: Transaction
 ) => {
   const { ChargeStation } = Models;
-  let chargeStationCreated = await ChargeStation.create(chargeStationObj);
+  let chargeStationCreated = await ChargeStation.create(chargeStationObj, {
+    transaction: t,
+  });
   if (chargeStationCreated) {
     chargeStationCreated = chargeStationCreated?.toJSON();
     return chargeStationCreated;
@@ -108,14 +111,17 @@ const getChargeStationBySerialNo = async (
 };
 
 /* Soft delete charge station */
-const deleteChargeStation = async (id: string) => {
+const deleteChargeStation = async (id: string, t: Transaction) => {
   const { ChargeStation } = Models;
-  const chargeStationDeleted = await ChargeStation.destroy({
-    where: {
-      charge_station_id: id,
+  const chargeStationDeleted = await ChargeStation.destroy(
+    {
+      where: {
+        charge_station_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return chargeStationDeleted;
 };
 

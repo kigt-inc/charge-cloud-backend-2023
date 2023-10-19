@@ -34,10 +34,13 @@ const getAllCertificates = async (params: { [key: string]: any }) => {
 
 /* Create new certificate*/
 const createCertificate = async (
-  certificateObj: CertificatesAttributes
+  certificateObj: CertificatesAttributes,
+  t: Transaction
 ) => {
   const { Certificate } = Models;
-  let certificateCreated = await Certificate.create(certificateObj);
+  let certificateCreated = await Certificate.create(certificateObj, {
+    transaction: t,
+  });
   if (certificateCreated) {
     certificateCreated = certificateCreated?.toJSON();
     return certificateCreated;
@@ -90,14 +93,17 @@ const getCertificate = async (id: string) => {
 };
 
 /* Soft delete certificate */
-const deleteCertificate = async (id: string) => {
+const deleteCertificate = async (id: string, t: Transaction) => {
   const { Certificate } = Models;
-  const certificateDeleted = await Certificate.destroy({
-    where: {
-      certificate_id: id,
+  const certificateDeleted = await Certificate.destroy(
+    {
+      where: {
+        certificate_id: id,
+      },
+      individualHooks: true,
     },
-    individualHooks: true,
-  });
+    { transaction: t }
+  );
   return certificateDeleted;
 };
 

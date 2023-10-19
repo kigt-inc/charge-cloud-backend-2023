@@ -4,10 +4,12 @@ import { zendeskTicketAttributes } from "../types/zendesk";
 import CONSTANTS from "../utils/constants";
 import { validateEmail } from "../utils/helpers";
 import Models from "../database/models";
+import { Transaction } from "sequelize";
 
 const createZendeskTicket = async (
   params: zendeskTicketAttributes,
-  userId: number
+  userId: number,
+  t: Transaction
 ) => {
   const { UserTicket } = Models;
   const ticketData = JSON.stringify({
@@ -43,7 +45,9 @@ const createZendeskTicket = async (
     user_id: userId,
     ticket_id: response?.data && response?.data?.ticket?.id,
   };
-  let userTicketCreated = await UserTicket.create(userTicketObj);
+  let userTicketCreated = await UserTicket.create(userTicketObj, {
+    transaction: t,
+  });
 
   if (response && userTicketCreated) {
     return response;
