@@ -576,9 +576,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             : (208 * data["EVSE Max Current"]) / 1000;
 
         if (lastTimestampInfo?.evse_status_code === "2") {
-          const eventDuration = moment(
-            allTimestampsForOneSession[0].status_change_timestamp
-          ).diff(
+          const eventDuration = moment(data["status_change_timestamp"]).diff(
             moment(
               allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
                 .status_change_timestamp
@@ -622,13 +620,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
             transaction_stop_reason: "normal",
           };
         }
-
         if (
-          (createObj?.evse_status_code === "254" &&
-            lastTimestampInfo?.evse_status_code === "3") ||
-          (createObj?.evse_status_code === "255" &&
-            lastTimestampInfo?.evse_status_code === "2" &&
-            lastTimestampInfo?.evse_max_current !== 28)
+          createObj?.evse_status_code === "254" &&
+          lastTimestampInfo?.evse_status_code === "3"
         ) {
           if (
             throttledTimestamp.length > 0 &&
@@ -639,8 +633,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
                 transactionTimestampId!
               );
             const eventDuration = moment(
-              lastTimestampInfo?.status_change_timestamp
-            ).diff(moment(createObj?.status_change_timestamp), "minutes", true);
+              moment(createObj?.status_change_timestamp)
+            ).diff(lastTimestampInfo?.status_change_timestamp, "minutes", true);
             await evChargerStationTransServices.editEVChargeStationTrans(
               {
                 event_end: createObj?.status_change_timestamp,
