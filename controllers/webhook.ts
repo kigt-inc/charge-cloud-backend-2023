@@ -211,11 +211,11 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     }
 
     const dataKeys: string[] = Object.keys(data);
-
+    console.log("datakeys", dataKeys);
     const keysDifference = hookKeys.findIndex(
       (hookKey) => !dataKeys.includes(hookKey)
     );
-
+    console.log("keydiffernce", keysDifference);
     if (keysDifference > -1) {
       await transaction.rollback();
       return res.status(400).send({
