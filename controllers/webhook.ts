@@ -346,7 +346,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         });
         break;
       case "10":
-        reason = "Vent Required";
+        reason = "over temperature error shutdown";
         html_body =
           html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
         priority = "urgent";
@@ -360,7 +360,10 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         });
         break;
       case "1":
-        if (lastTimestampInfo?.evse_status_code === "255") {
+        if (
+          lastTimestampInfo?.evse_status_code === "255" ||
+          lastTimestampInfo === null
+        ) {
           const transactionTimestampInfo =
             await transactionTimestampServices.createTransactionTimestamp(
               transaction
@@ -388,7 +391,10 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         };
         break;
       case "2":
-        if (lastTimestampInfo?.evse_status_code === "255") {
+        if (
+          lastTimestampInfo?.evse_status_code === "255" ||
+          lastTimestampInfo === null
+        ) {
           const transactionTimestampInfo =
             await transactionTimestampServices.createTransactionTimestamp(
               transaction

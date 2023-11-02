@@ -98,7 +98,10 @@ const getEVChargerTimestamp = async (id: string, transaction: Transaction) => {
 };
 
 /* get ev charger timestamp by id */
-const getEVChargerTimestampByUniqueId = async (id: string, transaction: Transaction) => {
+const getEVChargerTimestampByUniqueId = async (
+  id: string,
+  transaction: Transaction
+) => {
   const { EVChargerTimestamp } = Models;
   const evChargerTimestamp = await EVChargerTimestamp.findOne({
     where: {
@@ -152,7 +155,7 @@ const getAllEVChargerTimestampsByTransactionId = async (
   const evChargerTimestamps = await EVChargerTimestamp.findAll({
     where: {
       transaction_timestamps_id: transactionTimestampId,
-      serial_no
+      serial_no,
     },
     order: [["createdAt", "DESC"]],
     raw: true,
