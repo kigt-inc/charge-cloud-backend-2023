@@ -19,7 +19,7 @@ const createMerchant: RequestHandler = async (req, res, next) => {
       await t.rollback();
       res.status(400).json(checkMerchantValidation.message);
     } else {
-      let addMerchant = await merchantServices.createMerchant(createObj,t);
+      let addMerchant = await merchantServices.createMerchant(createObj, t);
       await t.commit();
       res.status(201).json({
         isSuccess: true,
@@ -78,8 +78,9 @@ const editMerchant: RequestHandler = async (req, res, next) => {
     let updateObj = req.body;
     updateObj = omitBeforeAddEdit(updateObj);
 
-    let checkMerchantValidation =
-      await merchantServices.merchantValidation(updateObj);
+    let checkMerchantValidation = await merchantServices.merchantValidation(
+      updateObj
+    );
     if (checkMerchantValidation && !checkMerchantValidation.isValid) {
       await transaction.rollback();
       res.status(400).json(checkMerchantValidation.message);
@@ -127,9 +128,7 @@ const getMerchant: RequestHandler = async (req, res, next) => {
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
-    const merchant = await merchantServices.getMerchant(
-      merchantId
-    );
+    const merchant = await merchantServices.getMerchant(merchantId);
     if (!merchant) {
       return res.status(400).json({
         isSuccess: false,
@@ -166,9 +165,7 @@ const deleteMerchant: RequestHandler = async (req, res, next) => {
         message: CONSTANTS.INVALID_PARAMS,
       });
     }
-    let merchantDeleted = await merchantServices.deleteMerchant(
-      merchantId,t
-    );
+    let merchantDeleted = await merchantServices.deleteMerchant(merchantId, t);
     if (merchantDeleted) {
       await t.commit();
       return res.status(200).json({

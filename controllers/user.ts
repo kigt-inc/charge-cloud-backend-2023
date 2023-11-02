@@ -24,7 +24,7 @@ const signup: RequestHandler = async (req, res, next) => {
       if (role === CONSTANTS.ROLES.USER) {
         createObj.role = CONSTANTS.ROLES.USER;
         createObj.cust_admin = "n";
-      } else if(role === CONSTANTS.ROLES.SUPERADMIN) {
+      } else if (role === CONSTANTS.ROLES.SUPERADMIN) {
         createObj.role = CONSTANTS.ROLES.SUPERADMIN;
         createObj.cust_admin = "y";
       } else {
