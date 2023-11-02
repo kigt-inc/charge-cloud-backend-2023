@@ -200,6 +200,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         .status(401)
         .send({ isSuccess: false, data: {}, message: CONSTANTS.AUTH_ERROR });
     }
+    console.log(data, "data");
 
     if (!data) {
       await transaction.rollback();
