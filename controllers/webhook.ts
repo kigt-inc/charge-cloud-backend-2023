@@ -202,9 +202,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     }
     console.log(data, "data");
 
-    if (!data) {
+    if (Object.keys(data).length == 0) {
       await transaction.rollback();
-      return res.status(204).send({
+      return res.status(400).send({
         isSuccess: false,
         data: {},
         message: CONSTANTS.NO_DATA,
