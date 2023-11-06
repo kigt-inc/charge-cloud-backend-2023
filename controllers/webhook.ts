@@ -64,16 +64,17 @@ const createInsertObj = (
     serial_no: data["Serial Number"],
     unique_id: data["unique_id"],
     evse_last_transaction_payment_id: data["EVSE Last Transaction Payment id"],
-    evse_last_transaction_timestamp: data["EVSE Last Transaction Timestamp"],
+    evse_last_transaction_timestamp:
+      data["EVSE Last Transaction Timestamp"] || null,
     evse_last_transaction_amount: data["EVSE Last Transaction Amount"],
-    evse_charging_last_time_stamp: data["EVSE Charging Last Timestamp"],
+    evse_charging_last_time_stamp: data["EVSE Charging Last Timestamp"] || null,
     evse_current: data["EVSE Current"],
-    evse_last_current_timestamp: data["EVSE Last Current Timestamp"],
+    evse_last_current_timestamp: data["EVSE Last Current Timestamp"] || null,
     EVSE_Pre_Charging_Energy: data["EVSE Pre Charging Energy"],
     evse_energy: data["EVSE Energy"],
     evse_connected_to_interface: data["EVSE Connected to Interface"],
     evse_location: data["EVSE Location"],
-    evse_max_current: data["EVSE Max Current"],
+    evse_max_current: data["EVSE Max Current"] || null,
     evse_payment_state: data["EVSE Payment State"],
     evse_app_ascreen: data["EVSE App Screen"],
     evse_status_code_raw: data["EVSE Status Code Raw"],
@@ -84,7 +85,7 @@ const createInsertObj = (
     evse_voltage: data["EVSE Voltage"],
     evse_quickpay_enabled: data["EVSE QuickPay Enabled"],
     evse_status_code_command: data["EVSE Status Code Command"],
-    status_change_timestamp: data["status_change_timestamp"],
+    status_change_timestamp: data["status_change_timestamp"] || null,
 
     EVSE_Throttle_Availability_Amount:
       data["EVSE Throttle Availability Amount"],
@@ -261,8 +262,11 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         data["Serial Number"],
         transaction
       );
-
-    switch (data["EVSE Status Code"]) {
+    const status_code = await evChargerTimestampsServices.getStatusCode(
+      data["EVSE Status Code"]
+    );
+    switch (status_code) {
+      case "04":
       case "4":
         reason = "Vent Required";
         html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
@@ -276,6 +280,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "05":
       case "5":
         reason = " Diode Check Failed";
         html_body =
@@ -290,6 +295,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "06":
       case "6":
         reason = "GFCI Fault";
         html_body =
@@ -304,6 +310,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "07":
       case "7":
         reason = "Bad Ground";
         html_body =
@@ -318,6 +325,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "08":
       case "8":
         reason = "Stuck Relay";
         html_body =
@@ -332,6 +340,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "09":
       case "9":
         reason = "GFI Self-Test Failure";
         html_body =
@@ -346,6 +355,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "010":
       case "10":
         reason = "over temperature error shutdown";
         html_body =
@@ -360,6 +370,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
+      case "01":
       case "1":
         if (
           lastTimestampInfo?.evse_status_code === "255" ||
@@ -391,6 +402,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           evse_app_screen: "Occupied",
         };
         break;
+      case "02":
       case "2":
         if (
           lastTimestampInfo?.evse_status_code === "255" ||
@@ -491,6 +503,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           chargeStationObj = null;
         }
         break;
+      case "03":
       case "3":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
@@ -560,7 +573,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           }
         }
         break;
+      case "0254":
       case "254":
+      case "0255":
       case "255":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);

@@ -164,6 +164,11 @@ const getAllEVChargerTimestampsByTransactionId = async (
   return evChargerTimestamps;
 };
 
+const getStatusCode = async (statusCode: number) => {
+  const data = statusCode.toString().split("^");
+  const dataAfter = data[1];
+  return dataAfter;
+};
 export default {
   getAllEVChargerTimestamps,
   createEVChargerTimestamp,
@@ -173,4 +178,5 @@ export default {
   lastEVChargerTimestamp,
   getAllEVChargerTimestampsByTransactionId,
   getEVChargerTimestampByUniqueId,
+  getStatusCode,
 };
