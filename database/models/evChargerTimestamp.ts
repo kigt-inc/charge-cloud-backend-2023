@@ -38,28 +38,28 @@ const EVChargerTimestamp = sequelize.define<EVChargerTimestampsModel>(
     },
     status_change_timestamp: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     evse_last_transaction_payment_id: {
       type: Sequelize.STRING,
     },
     evse_last_transaction_timestamp: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     evse_last_transaction_amount: {
       type: Sequelize.STRING,
     },
     evse_charging_last_time_stamp: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     evse_current: {
       type: Sequelize.STRING,
     },
     evse_last_current_timestamp: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     evse_energy: {
       type: Sequelize.STRING,
