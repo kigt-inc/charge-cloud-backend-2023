@@ -265,8 +265,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
     const status_code = await evChargerTimestampsServices.getStatusCode(
       data["EVSE Status Code"]
     );
-    switch (status_code) {
-      case "04":
+    data["EVSE Status Code"] = status_code;
+    switch (data["EVSE Status Code"]) {
       case "4":
         reason = "Vent Required";
         html_body = `<p>Problem: <strong>${reason}</strong></p><p>Charge Station Id: <strong>${chargeStation.charge_station_id}</strong></p><p>Timestamp: <strong>${data["status_change_timestamp"]}</strong></p>`;
@@ -280,7 +280,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "05":
       case "5":
         reason = " Diode Check Failed";
         html_body =
@@ -295,7 +294,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "06":
       case "6":
         reason = "GFCI Fault";
         html_body =
@@ -310,7 +308,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "07":
       case "7":
         reason = "Bad Ground";
         html_body =
@@ -325,7 +322,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "08":
       case "8":
         reason = "Stuck Relay";
         html_body =
@@ -340,7 +336,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "09":
       case "9":
         reason = "GFI Self-Test Failure";
         html_body =
@@ -355,7 +350,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "010":
       case "10":
         reason = "over temperature error shutdown";
         html_body =
@@ -370,7 +364,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transaction,
         });
         break;
-      case "01":
       case "1":
         if (
           lastTimestampInfo?.evse_status_code === "255" ||
@@ -402,7 +395,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           evse_app_screen: "Occupied",
         };
         break;
-      case "02":
       case "2":
         if (
           lastTimestampInfo?.evse_status_code === "255" ||
@@ -503,7 +495,6 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           chargeStationObj = null;
         }
         break;
-      case "03":
       case "3":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
@@ -573,9 +564,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           }
         }
         break;
-      case "0254":
       case "254":
-      case "0255":
       case "255":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
