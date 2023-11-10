@@ -7,7 +7,7 @@ import webhookController from "../controllers/webhook";
 
 /* Executor end points */
 
-router.get("/", webhookController.getWebhookEvent);
+router.post("/testing", webhookController.testWebhookEvent);
 router.post("/", webhookController.createWebHook);
 
 export default router;

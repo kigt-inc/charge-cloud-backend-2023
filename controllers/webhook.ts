@@ -717,11 +717,14 @@ const createWebHook: RequestHandler = async (req, res, next) => {
   }
 };
 
-const getWebhookEvent: RequestHandler = async (req, res, next) => {
-  console.log("webhook event details", req.body);
+const testWebhookEvent: RequestHandler = async (req, res, next) => {
+  console.log("webhook event details::", req.body);
+  res
+    .status(200)
+    .send({ isSuccess: true, message: "Test webhook API has been called" });
 };
 
 export default {
   createWebHook,
-  getWebhookEvent,
+  testWebhookEvent,
 };
