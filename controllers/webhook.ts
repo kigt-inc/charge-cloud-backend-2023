@@ -74,7 +74,7 @@ const createInsertObj = (
     evse_energy: data["EVSE Energy"],
     evse_connected_to_interface: data["EVSE Connected to Interface"],
     evse_location: data["EVSE Location"],
-    evse_max_current: data["EVSE Max Current"] || null,
+    evse_max_current: data["EVSE Max Current"] || 28,
     evse_payment_state: data["EVSE Payment State"],
     evse_app_ascreen: data["EVSE App Screen"],
     evse_status_code_raw: data["EVSE Status Code Raw"],
