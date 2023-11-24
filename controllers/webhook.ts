@@ -74,7 +74,7 @@ const createInsertObj = (
     evse_energy: data["EVSE Energy"],
     evse_connected_to_interface: data["EVSE Connected to Interface"],
     evse_location: data["EVSE Location"],
-    evse_max_current: data["EVSE Max Current"] || 28,
+    evse_max_current: 28,
     evse_payment_state: data["EVSE Payment State"],
     evse_app_ascreen: data["EVSE App Screen"],
     evse_status_code_raw: data["EVSE Status Code Raw"],
@@ -256,6 +256,9 @@ const createWebHook: RequestHandler = async (req, res, next) => {
         message: CONSTANTS.SERIAL_NO_NOT_FOUND,
       });
     }
+    //Changing current and voltage from charge Station table
+    (data["EVSE Current"] = chargeStation.evse_current),
+      (data["EVSE Voltage"] = chargeStation.evse_voltage);
 
     let lastTimestampInfo =
       await evChargerTimestampsServices.lastEVChargerTimestamp(
