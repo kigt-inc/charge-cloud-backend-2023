@@ -168,10 +168,13 @@ const getStatusCode = async (statusCode: number) => {
   if (statusCode.toString().includes("^")) {
     const data = statusCode.toString().split("^");
     let result;
-    if (data[1][0] === "0") {
-      result = data[1].slice(1, data[1].length);
+    if (data[0][0] === "0") {
+      result = data[0].slice(1, data[0].length);
       return result;
-    } else return data[1];
+    } else if (data[0][0] === "f") {
+      result = "255";
+      return result;
+    } else return data[0];
   } else return statusCode;
 };
 export default {
