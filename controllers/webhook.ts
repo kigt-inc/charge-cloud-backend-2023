@@ -588,8 +588,68 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           throttledTimestamp.length > 0
             ? data["EVSE Max Current"]
             : (208 * data["EVSE Max Current"]) / 1000;
-
-        if (lastTimestampInfo?.evse_status_code === "2") {
+        //this condition for handling sub transaction (3=>255)
+        if (
+          lastTimestampInfo?.evse_status_code === "254" ||
+          lastTimestampInfo?.evse_status_code === "3"
+        ) {
+          transObj = {
+            transaction_timestamp_id: transactionTimestampId!,
+            transaction_status: "Ended",
+            connector_status: "Occupied",
+            meter_end: createObj.status_change_timestamp,
+            transaction_stop_reason: "normal",
+          };
+          chargeStationObj = {
+            charge_station_status: "Connected",
+            evse_app_screen: "Connected",
+          };
+          const evChargerStationTran =
+            await evChargerStationTransServices.getAllEVChargeStationTransByTransactionTimestampId(
+              transactionTimestampId!
+            );
+          if (evChargerStationTran.length > 0) {
+            const energyUsage =
+              evChargerStationTran.length === 4
+                ? data["EVSE Max Current"]
+                : (208 * data["EVSE Max Current"]) / 1000;
+            const subEventDuration = moment(
+              data["status_change_timestamp"]
+            ).diff(
+              moment(evChargerStationTran[0]?.event_start),
+              "minutes",
+              true
+            );
+            const subTransObj = {
+              ...transObj,
+              event_end: data["status_change_timestamp"],
+              event_duration: subEventDuration,
+              kwh_session: (subEventDuration / 60) * energyUsage,
+            };
+            await evChargerStationTransServices.editEVChargeStationTrans(
+              subTransObj!,
+              evChargerStationTran.length === 4
+                ? evChargerStationTran[1]?.charge_record_id
+                : evChargerStationTran[0]?.charge_record_id,
+              transaction
+            );
+            evChargerStationTran.length === 4 &&
+              (await evChargerStationTransServices.editEVChargeStationTrans(
+                {
+                  event_end: createObj?.status_change_timestamp,
+                  kwh_session: (subEventDuration / 60) * energyUsage,
+                  event_duration: subEventDuration,
+                },
+                evChargerStationTran[0]?.charge_record_id,
+                transaction
+              ));
+          }
+        }
+        // add 3 status_code for main transaction
+        if (
+          lastTimestampInfo?.evse_status_code === "2" ||
+          lastTimestampInfo?.evse_status_code === "3"
+        ) {
           const eventDuration = moment(data["status_change_timestamp"]).diff(
             moment(
               allTimestampsForOneSession[allTimestampsForOneSession.length - 1]
@@ -608,10 +668,12 @@ const createWebHook: RequestHandler = async (req, res, next) => {
               transaction_timestamp_id: transactionTimestampId!,
               transaction_status: "Ended",
               connector_status: "Available",
-              event_end: allTimestampsForOneSession[0].status_change_timestamp,
+              // event_end: allTimestampsForOneSession[0].status_change_timestamp,
+              event_end: data["status_change_timestamp"],
               event_duration: eventDuration,
               meter_start: chargingStartTimestamp,
-              meter_end: allTimestampsForOneSession[0].status_change_timestamp,
+              // meter_end: allTimestampsForOneSession[0].status_change_timestamp,
+              meter_end: data["status_change_timestamp"],
               kwh_session: (eventDuration / 60) * energyUsage,
               transaction_stop_reason: "normal",
             };
