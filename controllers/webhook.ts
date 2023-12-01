@@ -382,6 +382,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         }
         createObj = createInsertObj(data, transactionTimestampId!);
+        createObj.evse_app_ascreen = "ReadyToCharge";
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
           transaction
@@ -413,6 +414,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
           transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         }
         createObj = createInsertObj(data, transactionTimestampId);
+        createObj.evse_app_ascreen = "ReadyToCharge";
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
           transaction
@@ -501,6 +503,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
       case "3":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
+        createObj.evse_app_ascreen = "Charging";
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
           transaction
@@ -571,6 +574,7 @@ const createWebHook: RequestHandler = async (req, res, next) => {
       case "255":
         transactionTimestampId = lastTimestampInfo?.transaction_timestamps_id;
         createObj = createInsertObj(data, transactionTimestampId);
+        createObj.evse_app_ascreen = "ChargingComplete";
         result = await evChargerTimestampsServices.createEVChargerTimestamp(
           createObj,
           transaction
