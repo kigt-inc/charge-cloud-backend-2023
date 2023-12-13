@@ -257,8 +257,8 @@ const createWebHook: RequestHandler = async (req, res, next) => {
       });
     }
     //Changing current and voltage from charge Station table
-    (data["EVSE Current"] = chargeStation.evse_current),
-      (data["EVSE Voltage"] = chargeStation.evse_voltage);
+    // (data["EVSE Current"] = chargeStation.evse_current),
+    //   (data["EVSE Voltage"] = chargeStation.evse_voltage);
 
     let lastTimestampInfo =
       await evChargerTimestampsServices.lastEVChargerTimestamp(
